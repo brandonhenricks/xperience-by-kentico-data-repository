@@ -8,26 +8,26 @@ namespace XperienceCommunity.DataRepository;
 
 public abstract class BaseRepository
 {
-    protected readonly int _cacheMinutes;
-    protected readonly IProgressiveCache _cache;
-    protected readonly IContentQueryExecutor _executor;
-    protected readonly IWebsiteChannelContext _websiteChannelContext;
+    protected readonly int CacheMinutes;
+    protected readonly IProgressiveCache Cache;
+    protected readonly IContentQueryExecutor Executor;
+    protected readonly IWebsiteChannelContext WebsiteChannelContext;
 
     protected BaseRepository(IProgressiveCache cache,
         IContentQueryExecutor executor, IWebsiteChannelContext websiteChannelContext, RepositoryOptions options)
     {
-        _cache = cache;
-        _executor = executor;
-        _websiteChannelContext = websiteChannelContext;
-        _cacheMinutes = options.CacheMinutes;
+        Cache = cache;
+        Executor = executor;
+        WebsiteChannelContext = websiteChannelContext;
+        CacheMinutes = options.CacheMinutes;
     }
 
 
     protected ContentQueryExecutionOptions GetQueryExecutionOptions()
     {
-        var queryOptions = new ContentQueryExecutionOptions { ForPreview = _websiteChannelContext.IsPreview };
+        var queryOptions = new ContentQueryExecutionOptions { ForPreview = WebsiteChannelContext.IsPreview };
 
-        queryOptions.IncludeSecuredItems = queryOptions.IncludeSecuredItems || _websiteChannelContext.IsPreview;
+        queryOptions.IncludeSecuredItems = queryOptions.IncludeSecuredItems || WebsiteChannelContext.IsPreview;
 
         return queryOptions;
     }
