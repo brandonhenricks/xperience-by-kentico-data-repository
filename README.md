@@ -34,7 +34,7 @@ In your `Startup.cs` or `Program.cs` file, configure the services to use the rep
 
 ```csharp
 // Register the repository services
-services.AddScoped<IYourEntityRepository, YourEntityRepository>();
+services.AddXperienceDataRepositories(options=> { options.CacheMinutes = 60;});
 ```
 
 ## Contributing

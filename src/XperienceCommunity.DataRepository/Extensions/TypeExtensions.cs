@@ -24,14 +24,12 @@ public static class TypeExtensions
     /// <summary>
     /// Thread safe dictionary for faster content type name lookup.
     /// </summary>
-    private static readonly ConcurrentDictionary<string, string> s_classNames =
-        new ConcurrentDictionary<string, string>();
+    private static readonly ConcurrentDictionary<string, string> sClassNames = new();
 
     /// <summary>
     /// Thread safe dictionary for faster schema name lookup.
     /// </summary>
-    private static readonly ConcurrentDictionary<string, string> s_schemaNames =
-        new ConcurrentDictionary<string, string>();
+    private static readonly ConcurrentDictionary<string, string> sSchemaNames = new();
 
     /// <summary>
     /// Determines whether the specified type inherits from <see cref="IWebPageFieldsSource"/>.
@@ -87,7 +85,7 @@ public static class TypeExtensions
             return null;
         }
 
-        if (s_schemaNames.TryGetValue(interfaceName, out string? schemaName))
+        if (sSchemaNames.TryGetValue(interfaceName, out string? schemaName))
         {
             return schemaName;
         }
@@ -99,7 +97,7 @@ public static class TypeExtensions
             return null;
         }
 
-        s_schemaNames.TryAdd(interfaceName, schemaName);
+        sSchemaNames.TryAdd(interfaceName, schemaName);
 
         return schemaName;
     }
@@ -125,7 +123,7 @@ public static class TypeExtensions
             return null;
         }
 
-        if (s_classNames.TryGetValue(type.FullName, out string? contentTypeName))
+        if (sClassNames.TryGetValue(type.FullName, out string? contentTypeName))
         {
             return contentTypeName;
         }
@@ -137,7 +135,7 @@ public static class TypeExtensions
             return null;
         }
 
-        s_classNames.TryAdd(type.FullName, contentTypeName);
+        sClassNames.TryAdd(type.FullName, contentTypeName);
 
         return contentTypeName;
     }

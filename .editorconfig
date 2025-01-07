@@ -137,8 +137,8 @@ dotnet_diagnostic.IDE0028.severity                                        = erro
 dotnet_style_prefer_auto_properties                                       = true : warning
 dotnet_diagnostic.IDE0032.severity                                        = warning
 
-dotnet_code_quality_unused_parameters                                     = all : error
-dotnet_diagnostic.IDE0060.severity                                        = error
+dotnet_code_quality_unused_parameters                                     = all : warning
+dotnet_diagnostic.IDE0060.severity                                        = warning
 
 dotnet_remove_unnecessary_suppression_exclusions                          = none : warning
 dotnet_diagnostic.IDE0079.severity                                        = warning
