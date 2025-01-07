@@ -1,19 +1,4 @@
-## ---Template info---
-
----Run the `Repository-Setup.ps1` in the root of this repository, specifying the `ProjectName` for the new project
----ex: `.\Repository-Setup.ps1 -ProjectName Kentico.Xperience.CoolProject`
-
----This section contains general information about the repository template and is to be deleted before submitting a pull request with the final documentation.---
-
----Lines enclosed by three dashes (like this one) are placeholders and comments to be replaced with specific information or deleted completely.---
-
-### ---Library naming conventions---
-
----Repository name – use "xperience-by-kentico-\<project-name\>" for projects aimed for Xperience by Kentico and "xperience-\<project-name\>" for projects aimed for Kentico Xperience 13---
-
----Package Name – use "Xperience by Kentico: \<Project Name\>" for projects aimed for Xperience by Kentico and "Xperience: \<Project Name\>" for projects aimed for Kentico Xperience 13---
-
-# ---Package Name---
+# XperienceCommunity.DataRepository
 
 ---Select the correct badge for the support policy and update the GitHub Action pipeline badge to point to this repository (replace `repo-template`)---
 
@@ -33,7 +18,7 @@
 
 | Xperience Version | Library Version |
 | ----------------- | --------------- |
-| >= 29.4.0         | 1.0.0           |
+| >= 29.6.0         | 1.0.0           |
 
 ### Dependencies
 
@@ -53,7 +38,7 @@
 Add the package to your application using the .NET CLI
 
 ```powershell
-dotnet add package <library nuget package name>
+dotnet add package XperienceCommunity.DataRepository
 ```
 
 ## Quick Start

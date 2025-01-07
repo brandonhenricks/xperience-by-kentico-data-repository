@@ -50,7 +50,7 @@ public static class IContentItemFieldsSourceExtensions
     /// </summary>
     /// <param name="source">The collection of content item fields sources.</param>
     /// <returns>An enumerable containing the content types.</returns>
-    public static IEnumerable<string?> GetContentTypes<T>(this IEnumerable<T>? source) where T : class, IContentItemFieldsSource, new() => source?.Select(static x => x.GetType().GetContentTypeName()) ?? [];
+    public static IEnumerable<string?> GetContentTypes<T>(this IEnumerable<T>? source) where T : class, IContentItemFieldsSource => source?.Select(static x => x.GetType().GetContentTypeName()) ?? [];
 
     /// <summary>
     /// Converts the specified collection of content item fields sources to a typed list.

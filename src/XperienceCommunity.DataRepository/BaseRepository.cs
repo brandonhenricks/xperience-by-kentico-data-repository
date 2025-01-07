@@ -2,6 +2,8 @@
 using CMS.Helpers;
 using CMS.Websites.Routing;
 
+using XperienceCommunity.DataRepository.Models;
+
 namespace XperienceCommunity.DataRepository;
 
 public abstract class BaseRepository
@@ -12,12 +14,12 @@ public abstract class BaseRepository
     protected readonly IWebsiteChannelContext _websiteChannelContext;
 
     protected BaseRepository(IProgressiveCache cache,
-        IContentQueryExecutor executor, IWebsiteChannelContext websiteChannelContext)
+        IContentQueryExecutor executor, IWebsiteChannelContext websiteChannelContext, RepositoryOptions options)
     {
         _cache = cache;
         _executor = executor;
         _websiteChannelContext = websiteChannelContext;
-        _cacheMinutes = 60;
+        _cacheMinutes = options.CacheMinutes;
     }
 
 

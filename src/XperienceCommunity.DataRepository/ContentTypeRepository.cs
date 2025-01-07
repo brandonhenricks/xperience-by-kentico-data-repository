@@ -4,6 +4,7 @@ using CMS.Websites.Routing;
 
 using XperienceCommunity.DataRepository.Extensions;
 using XperienceCommunity.DataRepository.Interfaces;
+using XperienceCommunity.DataRepository.Models;
 
 namespace XperienceCommunity.DataRepository;
 
@@ -12,8 +13,10 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
 {
     private readonly string _contentType = typeof(TEntity)?.GetContentTypeName() ?? string.Empty;
 
-    public ContentTypeRepository(IProgressiveCache cache,
-        IContentQueryExecutor executor, IWebsiteChannelContext websiteChannelContext) : base(cache, executor, websiteChannelContext)
+
+    public ContentTypeRepository(IProgressiveCache cache, IContentQueryExecutor executor,
+        IWebsiteChannelContext websiteChannelContext, RepositoryOptions options) : base(cache, executor,
+        websiteChannelContext, options)
     {
     }
 
@@ -199,7 +202,6 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
     public async Task<IEnumerable<TSchema>> GetAllBySchema<TSchema>(string languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
-
         string? schemaName = typeof(TSchema).GetReusableFieldSchemaName();
 
         var builder = new ContentItemQueryBuilder();
@@ -210,7 +212,6 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
             // Retrieves all items with the given reusable schema
 
             parameters.OfReusableSchema(schemaName).WithContentTypeFields();
-
         }).When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
         var queryOptions = GetQueryExecutionOptions();
 
@@ -221,6 +222,7 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
 
             return query;
         }
+
         var cacheSettings =
             new CacheSettings(_cacheMinutes, nameof(GetAllBySchema), schemaName, languageName, maxLinkedItems);
 

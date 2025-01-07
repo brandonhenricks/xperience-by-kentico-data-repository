@@ -80,7 +80,7 @@ public static class TypeExtensions
             return null;
         }
 
-        string? interfaceName = type.GetInterfaces().FirstOrDefault()?.Name;
+        string? interfaceName = type?.Name ?? type?.GetInterfaces().FirstOrDefault()?.Name;
 
         if (string.IsNullOrEmpty(interfaceName))
         {
