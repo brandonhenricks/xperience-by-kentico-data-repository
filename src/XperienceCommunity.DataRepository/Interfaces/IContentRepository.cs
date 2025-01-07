@@ -12,7 +12,7 @@ public interface IContentRepository<TEntity> : IRepository<TEntity> where TEntit
     /// <param name="maxLinkedItems">The maximum number of linked items to retrieve.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
-    Task<TEntity?> GetByNameAsync(string name, string languageName, int maxLinkedItems = 0, CancellationToken cancellationToken = default);
+    Task<TEntity?> GetByNameAsync(string name, string? languageName, int maxLinkedItems = 0, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets an entity by the specified identifier asynchronously.
@@ -22,7 +22,7 @@ public interface IContentRepository<TEntity> : IRepository<TEntity> where TEntit
     /// <param name="maxLinkedItems">The maximum number of linked items to retrieve.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the entity.</returns>
-    Task<TEntity?> GetByIdentifierAsync(Guid id, string languageName, int maxLinkedItems = 0, CancellationToken cancellationToken = default);
+    Task<TEntity?> GetByIdentifierAsync(Guid id, string? languageName, int maxLinkedItems = 0, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets entities by the specified smart folder ID asynchronously.

@@ -23,7 +23,7 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
 
     public override string CachePrefix => $"data|{contentType}|{WebsiteChannelContext.WebsiteChannelName}";
 
-    public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<Guid> nodeGuid, string languageName,
+    public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<Guid> nodeGuid, string? languageName,
         int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
@@ -73,7 +73,7 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         return cacheResult ?? [];
     }
 
-    public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<int> itemIds, string languageName,
+    public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<int> itemIds, string? languageName,
         int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
@@ -123,7 +123,7 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         return cacheResult ?? [];
     }
 
-    public async Task<IEnumerable<TEntity>> GetAllAsync(string languageName, int maxLinkedItems = 0,
+    public async Task<IEnumerable<TEntity>> GetAllAsync(string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
@@ -161,7 +161,7 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         }, cacheSettings, cancellationToken);
     }
 
-    public async Task<TEntity?> GetByGuidAsync(Guid itemGuid, string languageName, int maxLinkedItems = 0,
+    public async Task<TEntity?> GetByGuidAsync(Guid itemGuid, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
@@ -207,7 +207,7 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         }, cacheSettings, cancellationToken);
     }
 
-    public async Task<IEnumerable<TSchema>> GetAllBySchema<TSchema>(string languageName, int maxLinkedItems = 0,
+    public async Task<IEnumerable<TSchema>> GetAllBySchema<TSchema>(string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
         string? schemaName = typeof(TSchema).GetReusableFieldSchemaName();
@@ -251,7 +251,7 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         }, cacheSettings, cancellationToken);
     }
 
-    public async Task<TEntity?> GetByIdAsync(int id, string languageName, int maxLinkedItems = 0,
+    public async Task<TEntity?> GetByIdAsync(int id, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
@@ -295,7 +295,7 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         }, cacheSettings, cancellationToken);
     }
 
-    public async Task<TEntity?> GetByIdentifierAsync(Guid id, string languageName, int maxLinkedItems = 0,
+    public async Task<TEntity?> GetByIdentifierAsync(Guid id, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
         var builder = new ContentItemQueryBuilder();
@@ -336,7 +336,7 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         }, cacheSettings, cancellationToken);
     }
 
-    public async Task<TEntity?> GetByNameAsync(string name, string languageName, int maxLinkedItems = 0,
+    public async Task<TEntity?> GetByNameAsync(string name, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
         var builder = new ContentItemQueryBuilder();

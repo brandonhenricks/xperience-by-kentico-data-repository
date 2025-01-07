@@ -7,6 +7,7 @@ using CMS.Websites.Routing;
 using XperienceCommunity.DataRepository.Extensions;
 using XperienceCommunity.DataRepository.Interfaces;
 using XperienceCommunity.DataRepository.Models;
+
 #pragma warning disable S1121
 
 namespace XperienceCommunity.DataRepository;
@@ -29,6 +30,9 @@ public sealed class PageTypeRepository<TEntity> : BaseRepository, IPageRepositor
         int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrEmpty(columnName);
+        ArgumentException.ThrowIfNullOrEmpty(contentType);
+
         var guidList = tagIdentifiers?.ToArray() ?? [];
 
         if (guidList.Length == 0)
@@ -41,7 +45,7 @@ public sealed class PageTypeRepository<TEntity> : BaseRepository, IPageRepositor
                 config =>
                     config
                         .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                                linkOptions => linkOptions.IncludeWebPageData()))
+                            linkOptions => linkOptions.IncludeWebPageData()))
                         .OrderBy(OrderByColumn.Asc(nameof(IWebPageFieldsSource.SystemFields.WebPageItemOrder)))
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName)
                         .Where(guidList.Length > 0
@@ -76,7 +80,50 @@ public sealed class PageTypeRepository<TEntity> : BaseRepository, IPageRepositor
         }, cacheSettings, cancellationToken);
     }
 
-    public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<Guid> nodeGuid, string languageName,
+    public async Task<IEnumerable<TEntity>> GetAllAsync(string? languageName, int maxLinkedItems = 0,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(contentType);
+
+        var builder = new ContentItemQueryBuilder()
+            .ForContentType(contentType,
+                config =>
+                    config
+                        .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
+                            linkOptions => linkOptions.IncludeWebPageData()))
+                        .OrderBy(OrderByColumn.Asc(nameof(IWebPageFieldsSource.SystemFields.WebPageItemOrder)))
+                        .ForWebsite(WebsiteChannelContext.WebsiteChannelName))
+            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+
+        var queryOptions = GetQueryExecutionOptions();
+
+        if (WebsiteChannelContext.IsPreview)
+        {
+            return await Executor.GetMappedWebPageResult<TEntity>(builder, queryOptions,
+                cancellationToken: cancellationToken);
+        }
+
+        var cacheSettings =
+            new CacheSettings(CacheMinutes,
+                $"{CachePrefix}|{nameof(GetAllAsync)}|{languageName}|{maxLinkedItems}");
+
+
+        return await Cache.LoadAsync(async (cs, ct) =>
+        {
+            var result = (await Executor.GetMappedWebPageResult<TEntity>(builder, queryOptions,
+                cancellationToken: ct))?.ToList() ?? [];
+
+            if (cs.Cached = result.Count > 0)
+            {
+                cs.CacheDependency = CacheHelper.GetCacheDependency(
+                    $"webpageitem|bychannel|{WebsiteChannelContext.WebsiteChannelName}|bycontenttype|{contentType}");
+            }
+
+            return result;
+        }, cacheSettings, cancellationToken);
+    }
+
+    public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<Guid> nodeGuid, string? languageName,
         int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
@@ -94,7 +141,7 @@ public sealed class PageTypeRepository<TEntity> : BaseRepository, IPageRepositor
                 config =>
                     config
                         .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                                linkOptions => linkOptions.IncludeWebPageData()))
+                            linkOptions => linkOptions.IncludeWebPageData()))
                         .OrderBy(OrderByColumn.Asc(nameof(IWebPageFieldsSource.SystemFields.WebPageItemOrder)))
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName)
                         .Where(guidList.Length > 0
@@ -130,8 +177,8 @@ public sealed class PageTypeRepository<TEntity> : BaseRepository, IPageRepositor
         }, cacheSettings, cancellationToken);
     }
 
-    public async Task<IEnumerable<TEntity>> GetAllAsync(string languageName, int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<int> itemIds, string? languageName,
+        int maxLinkedItems = 0, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
 
@@ -140,23 +187,25 @@ public sealed class PageTypeRepository<TEntity> : BaseRepository, IPageRepositor
                 config =>
                     config
                         .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                                linkOptions => linkOptions.IncludeWebPageData()))
+                            linkOptions => linkOptions.IncludeWebPageData()))
                         .OrderBy(OrderByColumn.Asc(nameof(IWebPageFieldsSource.SystemFields.WebPageItemOrder)))
-                        .ForWebsite(WebsiteChannelContext.WebsiteChannelName))
+                        .Where(where =>
+                            where.WhereIn(nameof(IWebPageFieldsSource.SystemFields.WebPageItemID), itemIds)))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
         var queryOptions = GetQueryExecutionOptions();
 
         if (WebsiteChannelContext.IsPreview)
         {
-            return await Executor.GetMappedWebPageResult<TEntity>(builder, queryOptions,
+            var result = await Executor.GetMappedWebPageResult<TEntity>(builder, queryOptions,
                 cancellationToken: cancellationToken);
+
+            return result;
         }
 
         var cacheSettings =
             new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetAllAsync)}|{languageName}|{maxLinkedItems}");
-
+                $"{CachePrefix}|{nameof(GetAllAsync)}|{itemIds.GetHashCode()}|{languageName}|{maxLinkedItems}");
 
         return await Cache.LoadAsync(async (cs, ct) =>
         {
@@ -165,15 +214,15 @@ public sealed class PageTypeRepository<TEntity> : BaseRepository, IPageRepositor
 
             if (cs.Cached = result.Count > 0)
             {
-                cs.CacheDependency = CacheHelper.GetCacheDependency(
-                    $"webpageitem|bychannel|{WebsiteChannelContext.WebsiteChannelName}|bycontenttype|{contentType}");
+                cs.CacheDependency =
+                    CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
             }
 
             return result;
         }, cacheSettings, cancellationToken);
     }
 
-    public async Task<TEntity?> GetByIdAsync(int id, string languageName, int maxLinkedItems = 0,
+    public async Task<TEntity?> GetByIdAsync(int id, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
@@ -183,7 +232,7 @@ public sealed class PageTypeRepository<TEntity> : BaseRepository, IPageRepositor
                 config =>
                     config
                         .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                                linkOptions => linkOptions.IncludeWebPageData()))
+                            linkOptions => linkOptions.IncludeWebPageData()))
                         .OrderBy(OrderByColumn.Asc(nameof(IWebPageFieldsSource.SystemFields.WebPageItemOrder)))
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName)
                         .Where(predicate =>
@@ -221,7 +270,7 @@ public sealed class PageTypeRepository<TEntity> : BaseRepository, IPageRepositor
         }, cacheSettings, cancellationToken);
     }
 
-    public async Task<TEntity?> GetByGuidAsync(Guid itemGuid, string languageName, int maxLinkedItems = 0,
+    public async Task<TEntity?> GetByGuidAsync(Guid itemGuid, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
@@ -231,7 +280,7 @@ public sealed class PageTypeRepository<TEntity> : BaseRepository, IPageRepositor
                 config =>
                     config
                         .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                                linkOptions => linkOptions.IncludeWebPageData()))
+                            linkOptions => linkOptions.IncludeWebPageData()))
                         .OrderBy(OrderByColumn.Asc(nameof(IWebPageFieldsSource.SystemFields.WebPageItemOrder)))
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName)
                         .Where(predicate =>
@@ -270,7 +319,7 @@ public sealed class PageTypeRepository<TEntity> : BaseRepository, IPageRepositor
         }, cacheSettings, cancellationToken);
     }
 
-    public async Task<IEnumerable<TEntity>> GetByPathAsync(string path, string languageName, int maxLinkedItems = 0,
+    public async Task<IEnumerable<TEntity>> GetByPathAsync(string path, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
@@ -280,7 +329,7 @@ public sealed class PageTypeRepository<TEntity> : BaseRepository, IPageRepositor
                 config =>
                     config
                         .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                                linkOptions => linkOptions.IncludeWebPageData()))
+                            linkOptions => linkOptions.IncludeWebPageData()))
                         .OrderBy(OrderByColumn.Asc(nameof(IWebPageFieldsSource.SystemFields.WebPageItemOrder)))
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName, PathMatch.Single(path)))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
@@ -315,53 +364,8 @@ public sealed class PageTypeRepository<TEntity> : BaseRepository, IPageRepositor
         }, cacheSettings, cancellationToken);
     }
 
-    public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<int> itemIds, string languageName,
-        int maxLinkedItems = 0, CancellationToken cancellationToken = default)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(contentType);
 
-        var builder = new ContentItemQueryBuilder()
-            .ForContentType(contentType,
-                config =>
-                    config
-                        .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                                linkOptions => linkOptions.IncludeWebPageData()))
-                        .OrderBy(OrderByColumn.Asc(nameof(IWebPageFieldsSource.SystemFields.WebPageItemOrder)))
-                        .Where(where =>
-                            where.WhereIn(nameof(IWebPageFieldsSource.SystemFields.WebPageItemID), itemIds)))
-            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
-
-        var queryOptions = GetQueryExecutionOptions();
-
-        if (WebsiteChannelContext.IsPreview)
-        {
-            var result = await Executor.GetMappedWebPageResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-
-            return result;
-        }
-
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetAllAsync)}|{itemIds.GetHashCode()}|{languageName}|{maxLinkedItems}");
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedWebPageResult<TEntity>(builder, queryOptions,
-                cancellationToken: ct))?.ToList() ?? [];
-
-            if (cs.Cached = result.Count > 0)
-            {
-                cs.CacheDependency =
-                    CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
-            }
-
-            return result;
-        }, cacheSettings, cancellationToken);
-    }
-
-
-    public async Task<IEnumerable<TSchema>> GetAllBySchema<TSchema>(string languageName, int maxLinkedItems = 0,
+    public async Task<IEnumerable<TSchema>> GetAllBySchema<TSchema>(string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
         string? schemaName = typeof(TSchema).GetReusableFieldSchemaName();

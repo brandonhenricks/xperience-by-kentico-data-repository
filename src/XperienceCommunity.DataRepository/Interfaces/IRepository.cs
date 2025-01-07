@@ -25,7 +25,7 @@ public interface IRepository<TEntity>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
-    Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<Guid> nodeGuid, string languageName, int maxLinkedItems = 0,
+    Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<Guid> nodeGuid, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -36,7 +36,7 @@ public interface IRepository<TEntity>
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
-    Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<int> itemIds, string languageName, int maxLinkedItems = 0,
+    Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<int> itemIds, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -46,7 +46,7 @@ public interface IRepository<TEntity>
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
-    Task<IEnumerable<TEntity>> GetAllAsync(string languageName, int maxLinkedItems = 0,
+    Task<IEnumerable<TEntity>> GetAllAsync(string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -57,7 +57,7 @@ public interface IRepository<TEntity>
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the entity.</returns>
-    Task<TEntity?> GetByIdAsync(int id, string languageName, int maxLinkedItems = 0,
+    Task<TEntity?> GetByIdAsync(int id, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -68,7 +68,7 @@ public interface IRepository<TEntity>
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the entity.</returns>
-    Task<TEntity?> GetByGuidAsync(Guid itemGuid, string languageName, int maxLinkedItems = 0,
+    Task<TEntity?> GetByGuidAsync(Guid itemGuid, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -79,6 +79,6 @@ public interface IRepository<TEntity>
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
-    Task<IEnumerable<TSchema>> GetAllBySchema<TSchema>(string languageName, int maxLinkedItems = 0,
+    Task<IEnumerable<TSchema>> GetAllBySchema<TSchema>(string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 }
