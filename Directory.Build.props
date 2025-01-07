@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <Company>Kentico Software</Company>
+    <Company>Brandon Henricks</Company>
     <Authors>$(Company)</Authors>
     <Copyright>Copyright © $(Company) $([System.DateTime]::Now.Year)</Copyright>
     <Trademark>$(Company)™</Trademark>
@@ -9,11 +9,11 @@
     <VersionSuffix>prerelease-1</VersionSuffix>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
-    <PackageProjectUrl>https://github.com/Kentico/REPOSITORY_NAME</PackageProjectUrl>
-    <PackageReleaseNotes>https://github.com/Kentico/REPOSITORY_NAME/releases</PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/brandonhenricks/xperience-by-kentico-data-repository</PackageProjectUrl>
+    <PackageReleaseNotes>https://github.com/brandonhenricks/xperience-by-kentico-data-repository</PackageReleaseNotes>
     <PackageIcon>logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>xperience;kentico;aspnetcore</PackageTags>
+    <PackageTags>xperience;kentico;aspnetcore;data-access;xperience-by-kentico</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <WarningsAsErrors>nullable</WarningsAsErrors>
@@ -30,7 +30,7 @@
     <CopyDocumentationFilesFromPackages>true</CopyDocumentationFilesFromPackages>
     <CopyDebugSymbolFilesFromPackages>true</CopyDebugSymbolFilesFromPackages>
     <NoWarn>$(NoWarn);1591</NoWarn>
-    <RootNamespace>Kentico.Xperience.RepoTemplate</RootNamespace>
+    <RootNamespace>XperienceCommunity.DataRepository</RootNamespace>
 
     <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
     <TimestampServerUrl>http://timestamp.digicert.com</TimestampServerUrl>
