@@ -5,6 +5,7 @@ using NSubstitute;
 
 using XperienceCommunity.DataRepository.Extensions;
 
+#pragma warning disable S1144
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace XperienceCommunity.DataRepository.Tests.Extensions
 #pragma warning restore IDE0130 // Namespace does not match folder structure

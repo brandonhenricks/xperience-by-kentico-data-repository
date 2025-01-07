@@ -6,6 +6,7 @@ using XperienceCommunity.DataRepository.Extensions;
 using XperienceCommunity.DataRepository.Interfaces;
 using XperienceCommunity.DataRepository.Models;
 #pragma warning disable S1121
+#pragma warning disable IDE0055
 
 namespace XperienceCommunity.DataRepository;
 
@@ -633,8 +634,6 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentType(contentType, config =>
-            // Retrieves all items with the given reusable schema
-
             config
                 .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
                         linkOptions => linkOptions.IncludeWebPageData())).Where(tagIdents.Count > 0
