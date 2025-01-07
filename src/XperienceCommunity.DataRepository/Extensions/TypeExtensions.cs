@@ -92,7 +92,7 @@ public static class TypeExtensions
             return schemaName;
         }
 
-        schemaName = type.GetStaticString(ReusableFieldSchemaName);
+        schemaName = type?.GetStaticString(ReusableFieldSchemaName);
 
         if (string.IsNullOrEmpty(schemaName))
         {
