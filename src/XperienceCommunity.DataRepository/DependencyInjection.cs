@@ -14,13 +14,23 @@ public static class DependencyInjection
     /// <param name="services">The service collection to add the repositories to.</param>
     /// <param name="options">A delegate to configure the repository options.</param>
     /// <returns>The updated service collection.</returns>
-    public static IServiceCollection AddXperienceDataRepositories(this IServiceCollection services, Action<RepositoryOptions> options)
+    public static IServiceCollection AddXperienceDataRepositories(this IServiceCollection services, Action<RepositoryOptions>? options)
     {
         var repositoryOptions = new RepositoryOptions() { CacheMinutes = 60 };
 
-        options(repositoryOptions);
+        if (options != null)
+        {
+            options(repositoryOptions);
 
-        services.Configure(options);
+            services.Configure(options);
+        }
+        else
+        {
+            services.Configure<RepositoryOptions>(options =>
+            {
+                options.CacheMinutes = 60;
+            });
+        }
 
         services.TryAddScoped(typeof(IContentRepository<>), typeof(ContentTypeRepository<>));
 
