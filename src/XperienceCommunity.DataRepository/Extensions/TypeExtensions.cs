@@ -4,6 +4,8 @@ using System.Reflection;
 using CMS.ContentEngine;
 using CMS.Websites;
 
+#pragma warning disable IDE0060 // Remove unused parameter
+
 namespace XperienceCommunity.DataRepository.Extensions;
 
 /// <summary>
