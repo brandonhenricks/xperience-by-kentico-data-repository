@@ -9,7 +9,6 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions;
 [TestFixture]
 public class IWebPageFieldsSourceExtensionsTests
 {
-
     public class TestWebPageFieldsSource : IWebPageFieldsSource
     {
         public static string CONTENT_TYPE_NAME = "TestWebPageFieldsSource";
@@ -136,6 +135,4 @@ public class IWebPageFieldsSourceExtensionsTests
         Assert.That(result, Is.EqualTo(new[] { "TestWebPageFieldsSource", "TestWebPageFieldsSource" }));
         Assert.That(result, Is.EqualTo(new[] { "TestWebPageFieldsSource", "TestWebPageFieldsSource" }));
     }
-
 }
-

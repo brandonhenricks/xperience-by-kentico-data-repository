@@ -7,6 +7,7 @@ using XperienceCommunity.DataRepository.Extensions;
 
 #pragma warning disable S1144
 #pragma warning disable IDE0130 // Namespace does not match folder structure
+
 namespace XperienceCommunity.DataRepository.Tests.Extensions
 #pragma warning restore IDE0130 // Namespace does not match folder structure
 {
@@ -19,92 +20,27 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions
             public const string REUSABLE_FIELD_SCHEMA_NAME = "TestSchema";
         }
 
-        private class TestWebPageFieldsSource : IWebPageFieldsSource
-        {
-            public static string CONTENT_TYPE_NAME = "TestWebPageFieldsSource";
-
-            public WebPageFields SystemFields => throw new NotImplementedException();
-        }
-
-        private class TestContentItemFieldsSource : IContentItemFieldsSource
-        {
-            public static string CONTENT_TYPE_NAME = "TestContentItemFieldsSource";
-            public ContentItemFields SystemFields => throw new NotImplementedException();
-        }
-
         [Test]
-        public void InheritsFromIWebPageFieldsSource_ShouldReturnTrue_WhenTypeInherits()
+        public void GetContentTypeName_ShouldReturnContentTypeName_WhenTypeInheritsFromIWebPageFieldsSource()
         {
             // Arrange
             var type = typeof(TestWebPageFieldsSource);
 
             // Act
-            bool result = type.InheritsFromIWebPageFieldsSource();
-
-            // Assert
-            Assert.That(result, Is.True);
-        }
-
-        [Test]
-        public void InheritsFromIWebPageFieldsSource_ShouldReturnFalse_WhenTypeDoesNotInherit()
-        {
-            // Arrange
-            var type = typeof(string);
-
-            // Act
-            bool result = type.InheritsFromIWebPageFieldsSource();
-
-            // Assert
-            Assert.That(result, Is.False);
-        }
-
-        [Test]
-        public void InheritsFromIContentItemFieldsSource_ShouldReturnTrue_WhenTypeInherits()
-        {
-            // Arrange
-            var type = typeof(TestContentItemFieldsSource);
-
-            // Act
-            bool result = type.InheritsFromIContentItemFieldsSource();
-
-            // Assert
-            Assert.That(result, Is.True);
-        }
-
-        [Test]
-        public void InheritsFromIContentItemFieldsSource_ShouldReturnFalse_WhenTypeDoesNotInherit()
-        {
-            // Arrange
-            var type = typeof(string);
-
-            // Act
-            bool result = type.InheritsFromIContentItemFieldsSource();
-
-            // Assert
-            Assert.That(result, Is.False);
-        }
-
-        [Test]
-        public void GetStaticString_ShouldReturnFieldValue_WhenFieldExists()
-        {
-            // Arrange
-            var type = typeof(TestWebPageFieldsSource);
-
-            // Act
-            string? result = type.GetStaticString("CONTENT_TYPE_NAME");
+            string? result = type.GetContentTypeName();
 
             // Assert
             Assert.That(result, Is.EqualTo("TestWebPageFieldsSource"));
         }
 
         [Test]
-        public void GetStaticString_ShouldReturnNull_WhenFieldDoesNotExist()
+        public void GetContentTypeName_ShouldReturnNull_WhenTypeDoesNotInheritFromIWebPageFieldsSourceOrIContentItemFieldsSource()
         {
             // Arrange
-            var type = typeof(TestWebPageFieldsSource);
+            var type = typeof(string);
 
             // Act
-            string? result = type.GetStaticString("NON_EXISTENT_FIELD");
+            string? result = type.GetContentTypeName();
 
             // Assert
             Assert.That(result, Is.Null);
@@ -137,29 +73,94 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions
         }
 
         [Test]
-        public void GetContentTypeName_ShouldReturnContentTypeName_WhenTypeInheritsFromIWebPageFieldsSource()
+        public void GetStaticString_ShouldReturnFieldValue_WhenFieldExists()
         {
             // Arrange
             var type = typeof(TestWebPageFieldsSource);
 
             // Act
-            string? result = type.GetContentTypeName();
+            string? result = type.GetStaticString("CONTENT_TYPE_NAME");
 
             // Assert
             Assert.That(result, Is.EqualTo("TestWebPageFieldsSource"));
         }
 
         [Test]
-        public void GetContentTypeName_ShouldReturnNull_WhenTypeDoesNotInheritFromIWebPageFieldsSourceOrIContentItemFieldsSource()
+        public void GetStaticString_ShouldReturnNull_WhenFieldDoesNotExist()
+        {
+            // Arrange
+            var type = typeof(TestWebPageFieldsSource);
+
+            // Act
+            string? result = type.GetStaticString("NON_EXISTENT_FIELD");
+
+            // Assert
+            Assert.That(result, Is.Null);
+        }
+
+        [Test]
+        public void InheritsFromIContentItemFieldsSource_ShouldReturnFalse_WhenTypeDoesNotInherit()
         {
             // Arrange
             var type = typeof(string);
 
             // Act
-            string? result = type.GetContentTypeName();
+            bool result = type.InheritsFromIContentItemFieldsSource();
 
             // Assert
-            Assert.That(result, Is.Null);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void InheritsFromIContentItemFieldsSource_ShouldReturnTrue_WhenTypeInherits()
+        {
+            // Arrange
+            var type = typeof(TestContentItemFieldsSource);
+
+            // Act
+            bool result = type.InheritsFromIContentItemFieldsSource();
+
+            // Assert
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void InheritsFromIWebPageFieldsSource_ShouldReturnFalse_WhenTypeDoesNotInherit()
+        {
+            // Arrange
+            var type = typeof(string);
+
+            // Act
+            bool result = type.InheritsFromIWebPageFieldsSource();
+
+            // Assert
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void InheritsFromIWebPageFieldsSource_ShouldReturnTrue_WhenTypeInherits()
+        {
+            // Arrange
+            var type = typeof(TestWebPageFieldsSource);
+
+            // Act
+            bool result = type.InheritsFromIWebPageFieldsSource();
+
+            // Assert
+            Assert.That(result, Is.True);
+        }
+
+        private class TestContentItemFieldsSource : IContentItemFieldsSource
+        {
+            public static string CONTENT_TYPE_NAME = "TestContentItemFieldsSource";
+            public ContentItemFields SystemFields => throw new NotImplementedException();
+        }
+
+        private class TestWebPageFieldsSource : IWebPageFieldsSource
+        {
+            public static string CONTENT_TYPE_NAME = "TestWebPageFieldsSource";
+
+            public WebPageFields SystemFields => throw new NotImplementedException();
         }
     }
 }

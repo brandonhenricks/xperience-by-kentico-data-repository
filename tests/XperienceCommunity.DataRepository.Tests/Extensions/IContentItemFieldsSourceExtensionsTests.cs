@@ -4,77 +4,14 @@ using NSubstitute;
 
 using XperienceCommunity.DataRepository.Extensions;
 
+#pragma warning disable IDE0001
+#pragma warning disable IDE0090
+
 namespace XperienceCommunity.DataRepository.Tests.Extensions
 {
     [TestFixture]
     public class IContentItemFieldsSourceExtensionsTests
     {
-        public class TestContentItemFieldsSource : IContentItemFieldsSource
-        {
-            public static string CONTENT_TYPE_NAME = "TestContentItemFieldsSource";
-            public ContentItemFields SystemFields => new ContentItemFields();
-        }
-
-        [Test]
-        public void IsSecureItem_ReturnsTrue_WhenItemIsSecure()
-        {
-            var source = Substitute.For<IContentItemFieldsSource>();
-            var systemFields = new ContentItemFields { ContentItemIsSecured = true };
-            source.SystemFields.Returns(systemFields);
-
-            bool result = source.IsSecureItem();
-
-            Assert.That(result, Is.True);
-        }
-
-        [Test]
-        public void IsSecureItem_ReturnsFalse_WhenItemIsNotSecure()
-        {
-            var source = Substitute.For<IContentItemFieldsSource>();
-            var systemFields = new ContentItemFields { ContentItemIsSecured = false };
-            source.SystemFields.Returns(systemFields);
-
-            bool result = source.IsSecureItem();
-
-            Assert.That(result, Is.False);
-        }
-
-        [Test]
-        public void HasSecureItems_ReturnsTrue_WhenAnyItemIsSecure()
-        {
-            var source = new List<IContentItemFieldsSource>
-            {
-                Substitute.For<IContentItemFieldsSource>(), Substitute.For<IContentItemFieldsSource>()
-            };
-            var systemFields1 = new ContentItemFields { ContentItemIsSecured = false };
-            var systemFields2 = new ContentItemFields { ContentItemIsSecured = true };
-
-            source[0].SystemFields.Returns(systemFields1);
-            source[1].SystemFields.Returns(systemFields2);
-
-            bool result = source.HasSecureItems();
-
-            Assert.That(result, Is.True);
-        }
-
-        [Test]
-        public void HasSecureItems_ReturnsFalse_WhenNoItemsAreSecure()
-        {
-            var source = new List<IContentItemFieldsSource>
-            {
-                Substitute.For<IContentItemFieldsSource>(), Substitute.For<IContentItemFieldsSource>()
-            };
-            var systemFields1 = new ContentItemFields { ContentItemIsSecured = false };
-            var systemFields2 = new ContentItemFields { ContentItemIsSecured = false };
-
-            source[0].SystemFields.Returns(systemFields1);
-            source[1].SystemFields.Returns(systemFields2);
-
-            bool result = source.HasSecureItems();
-
-            Assert.That(result, Is.False);
-        }
-
         [Test]
         public void GetCacheDependencyKey_ReturnsCorrectKey()
         {
@@ -138,6 +75,66 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions
         }
 
         [Test]
+        public void HasSecureItems_ReturnsFalse_WhenNoItemsAreSecure()
+        {
+            var source = new List<IContentItemFieldsSource>
+            {
+                Substitute.For<IContentItemFieldsSource>(), Substitute.For<IContentItemFieldsSource>()
+            };
+            var systemFields1 = new ContentItemFields { ContentItemIsSecured = false };
+            var systemFields2 = new ContentItemFields { ContentItemIsSecured = false };
+
+            source[0].SystemFields.Returns(systemFields1);
+            source[1].SystemFields.Returns(systemFields2);
+
+            bool result = source.HasSecureItems();
+
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void HasSecureItems_ReturnsTrue_WhenAnyItemIsSecure()
+        {
+            var source = new List<IContentItemFieldsSource>
+            {
+                Substitute.For<IContentItemFieldsSource>(), Substitute.For<IContentItemFieldsSource>()
+            };
+            var systemFields1 = new ContentItemFields { ContentItemIsSecured = false };
+            var systemFields2 = new ContentItemFields { ContentItemIsSecured = true };
+
+            source[0].SystemFields.Returns(systemFields1);
+            source[1].SystemFields.Returns(systemFields2);
+
+            bool result = source.HasSecureItems();
+
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void IsSecureItem_ReturnsFalse_WhenItemIsNotSecure()
+        {
+            var source = Substitute.For<IContentItemFieldsSource>();
+            var systemFields = new ContentItemFields { ContentItemIsSecured = false };
+            source.SystemFields.Returns(systemFields);
+
+            bool result = source.IsSecureItem();
+
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void IsSecureItem_ReturnsTrue_WhenItemIsSecure()
+        {
+            var source = Substitute.For<IContentItemFieldsSource>();
+            var systemFields = new ContentItemFields { ContentItemIsSecured = true };
+            source.SystemFields.Returns(systemFields);
+
+            bool result = source.IsSecureItem();
+
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
         public void ToTypedList_ReturnsCorrectList()
         {
             var source = new List<TestContentItemFieldsSource>
@@ -148,6 +145,12 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions
             var result = source.ToTypedList<TestContentItemFieldsSource>();
 
             Assert.That(result.Count, Is.EqualTo(2));
+        }
+
+        public class TestContentItemFieldsSource : IContentItemFieldsSource
+        {
+            public static string CONTENT_TYPE_NAME = "TestContentItemFieldsSource";
+            public ContentItemFields SystemFields => new ContentItemFields();
         }
     }
 }
