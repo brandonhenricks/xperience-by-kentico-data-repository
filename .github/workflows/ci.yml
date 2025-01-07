@@ -23,7 +23,7 @@ jobs:
         run: dotnet restore
 
       - name: Run dotnet format
-        run: dotnet format XperienceCommunity.DataRepository.sln --exclude ./examples/** --verify-no-changes
+        run: dotnet format XperienceCommunity.DataRepository.sln --exclude ./examples/** --verify-no-changes --verbosity diagnostic
 
   build_and_test:
     name: Build and Test
