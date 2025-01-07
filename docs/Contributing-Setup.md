@@ -10,7 +10,7 @@ The requirements to setup, develop, and build this project are listed below.
 
 ### .NET Runtime
 
-.NET SDK 7.0 or newer
+.NET SDK 8.0 or newer
 
 - <https://dotnet.microsoft.com/en-us/download/dotnet/8.0>
 - See `global.json` file for specific SDK requirements
