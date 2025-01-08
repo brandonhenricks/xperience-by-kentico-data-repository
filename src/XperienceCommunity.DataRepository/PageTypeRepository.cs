@@ -229,6 +229,11 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
             typeof(T1).GetContentTypeName(), typeof(T2).GetContentTypeName()
         ];
 
+        if (contentTypes.Length == 0)
+        {
+            return [];
+        }
+
         var builder = new ContentItemQueryBuilder()
             .ForContentTypes(
                 config =>
