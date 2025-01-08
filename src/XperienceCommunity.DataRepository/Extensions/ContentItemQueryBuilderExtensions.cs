@@ -6,6 +6,21 @@ public static class ContentItemQueryBuilderExtensions
 {
 
     /// <summary>
+    /// Configures the <see cref="ContentItemQueryBuilder"/> for the specified content type.
+    /// </summary>
+    /// <typeparam name="T">The type that implements <see cref="IContentItemFieldsSource"/>.</typeparam>
+    /// <param name="source">The <see cref="ContentItemQueryBuilder"/> to configure.</param>
+    /// <param name="configureQuery">An optional action to configure the <see cref="ContentTypeQueryParameters"/>.</param>
+    /// <returns>The configured <see cref="ContentItemQueryBuilder"/>.</returns>
+    public static ContentItemQueryBuilder ForContentType<T>(this ContentItemQueryBuilder source,
+        Action<ContentTypeQueryParameters>? configureQuery = null) where T : IContentItemFieldsSource
+    {
+        string contentType = typeof(T).GetContentTypeName() ?? string.Empty;
+
+        return source.ForContentType(contentType, configureQuery);
+    }
+
+    /// <summary>
     /// Conditionally applies an action to the <see cref="ContentItemQueryBuilder"/> if the specified condition is true.
     /// </summary>
     /// <param name="source">The <see cref="ContentItemQueryBuilder"/> to apply the action to.</param>

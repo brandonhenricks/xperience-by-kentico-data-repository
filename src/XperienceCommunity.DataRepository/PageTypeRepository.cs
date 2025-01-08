@@ -11,16 +11,12 @@ using XperienceCommunity.DataRepository.Models;
 #pragma warning disable S1121
 namespace XperienceCommunity.DataRepository;
 
-public sealed class PageTypeRepository<TEntity> : BaseRepository, IPageRepository<TEntity>
+public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IContentQueryExecutor executor,
+    IWebsiteChannelContext websiteChannelContext, RepositoryOptions options) : BaseRepository(cache, executor,
+    websiteChannelContext, options), IPageRepository<TEntity>
     where TEntity : class, IWebPageFieldsSource
 {
     private readonly string? contentType = typeof(TEntity)?.GetContentTypeName() ?? string.Empty;
-
-    public PageTypeRepository(IProgressiveCache cache, IContentQueryExecutor executor,
-        IWebsiteChannelContext websiteChannelContext, RepositoryOptions options) : base(cache, executor,
-        websiteChannelContext, options)
-    {
-    }
 
     public override string CachePrefix => $"data|{contentType}|{WebsiteChannelContext.WebsiteChannelName}";
 
@@ -30,7 +26,7 @@ public sealed class PageTypeRepository<TEntity> : BaseRepository, IPageRepositor
         ArgumentException.ThrowIfNullOrEmpty(contentType);
 
         var builder = new ContentItemQueryBuilder()
-            .ForContentType(contentType,
+            .ForContentType<TEntity>(
                 config =>
                     config
                         .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
@@ -188,8 +184,9 @@ public sealed class PageTypeRepository<TEntity> : BaseRepository, IPageRepositor
             .When(maxLinkedItems > 0, linkItemOptions => linkItemOptions.WithLinkedItems(maxLinkedItems))
             .OfReusableSchema(schemaName)
             .WithWebPageData()
-            .ForWebsite(WebsiteChannelContext.WebsiteChannelName)).When(!string.IsNullOrEmpty(languageName),
-            lang => lang.InLanguage(languageName));
+            .ForWebsite(WebsiteChannelContext.WebsiteChannelName))
+            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+
         var queryOptions = GetQueryExecutionOptions();
 
         if (WebsiteChannelContext.IsPreview)

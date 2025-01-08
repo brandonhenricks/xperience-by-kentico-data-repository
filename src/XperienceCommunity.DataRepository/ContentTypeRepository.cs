@@ -5,25 +5,27 @@ using CMS.Websites.Routing;
 using XperienceCommunity.DataRepository.Extensions;
 using XperienceCommunity.DataRepository.Interfaces;
 using XperienceCommunity.DataRepository.Models;
+
 #pragma warning disable S1121
 #pragma warning disable IDE0055
 
 namespace XperienceCommunity.DataRepository;
 
-public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRepository<TEntity>
+public sealed class ContentTypeRepository<TEntity>(
+    IProgressiveCache cache,
+    IContentQueryExecutor executor,
+    IWebsiteChannelContext websiteChannelContext,
+    RepositoryOptions options)
+    : BaseRepository(cache, executor,
+        websiteChannelContext, options), IContentRepository<TEntity>
     where TEntity : class, IContentItemFieldsSource
 {
     private readonly string contentType = typeof(TEntity)?.GetContentTypeName() ?? string.Empty;
 
 
-    public ContentTypeRepository(IProgressiveCache cache, IContentQueryExecutor executor,
-        IWebsiteChannelContext websiteChannelContext, RepositoryOptions options) : base(cache, executor,
-        websiteChannelContext, options)
-    {
-    }
-
     public override string CachePrefix => $"data|{contentType}|{WebsiteChannelContext.WebsiteChannelName}";
 
+    /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<Guid> nodeGuid, string? languageName,
         int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
@@ -32,19 +34,17 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
 
         var guidList = nodeGuid?.ToArray() ?? [];
 
+        if (guidList.Length == 0)
+        {
+            return [];
+        }
+
         var builder = new ContentItemQueryBuilder();
 
-        builder.ForContentType(contentType, config =>
-        {
-            config.When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems));
-
-            // Retrieves all items with the given reusable schema
-
-            config.Where(guidList.Length > 0
-                ? where => where.WhereIn(nameof(IContentItemFieldsSource.SystemFields.ContentItemGUID),
-                    guidList)
-                : null);
-        }).When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+        builder.ForContentType(contentType, config => config
+            .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+            .Where(where => where.WhereIn(nameof(IContentItemFieldsSource.SystemFields.ContentItemGUID),
+                guidList))).When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
         var queryOptions = GetQueryExecutionOptions();
 
@@ -63,10 +63,14 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
             var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
                 cancellationToken: ct))?.ToList() ?? [];
 
-            if (cs.Cached = result.Count > 0)
+            cs.BoolCondition = result.Count > 0;
+
+            if (!cs.Cached)
             {
-                cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
+                return result;
             }
+
+            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
 
             return result;
         }, cacheSettings, cancellationToken);
@@ -74,6 +78,7 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         return cacheResult ?? [];
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<int> itemIds, string? languageName,
         int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
@@ -82,19 +87,17 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
 
         int[] idList = itemIds?.ToArray() ?? [];
 
+        if (idList.Length == 0)
+        {
+            return [];
+        }
+
         var builder = new ContentItemQueryBuilder();
 
-        builder.ForContentType(contentType, config =>
-        {
-            config.When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems));
-
-            // Retrieves all items with the given reusable schema
-
-            config.Where(idList.Length > 0
-                ? where => where.WhereIn(nameof(IContentItemFieldsSource.SystemFields.ContentItemID),
-                    idList)
-                : null);
-        }).When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+        builder.ForContentType(contentType, config => config
+                .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+                .Where(where => where.WhereIn(nameof(IContentItemFieldsSource.SystemFields.ContentItemID), idList)))
+            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
         var queryOptions = GetQueryExecutionOptions();
 
@@ -113,10 +116,14 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
             var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
                 cancellationToken: ct))?.ToList() ?? [];
 
-            if (cs.Cached = result.Count != 0)
+            cs.BoolCondition = result.Count > 0;
+
+            if (!cs.Cached)
             {
-                cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
+                return result;
             }
+
+            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
 
             return result;
         }, cacheSettings, cancellationToken);
@@ -124,6 +131,7 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         return cacheResult ?? [];
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetAllAsync(string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
@@ -132,8 +140,8 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentType(contentType
-            , config =>
-                config.When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems)))
+                , config =>
+                    config.When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems)))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
         var queryOptions = GetQueryExecutionOptions();
@@ -153,15 +161,20 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
             var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
                 cancellationToken: ct))?.ToList() ?? [];
 
-            if (cs.Cached = result.Count != 0)
+
+            cs.BoolCondition = result.Count > 0;
+
+            if (!cs.Cached)
             {
-                cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
+                return result;
             }
 
+            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
             return result;
         }, cacheSettings, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<TEntity?> GetByGuidAsync(Guid itemGuid, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
@@ -170,15 +183,12 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentType(contentType
-            , config =>
-            {
-                config.When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems));
-
-                // Retrieves all items with the given reusable schema
-                config.Where(where =>
+                , config => config
+                    .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+                    .Where(where =>
                         where.WhereEquals(nameof(IContentItemFieldsSource.SystemFields.ContentItemGUID), itemGuid))
-                    .TopN(1);
-            }).When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+                    .TopN(1))
+            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
         var queryOptions = GetQueryExecutionOptions();
 
@@ -198,16 +208,22 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
             var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
                 cancellationToken: ct)).FirstOrDefault();
 
-            if (cs.Cached = result != null)
+            cs.BoolCondition = result != null;
+
+            if (!cs.Cached)
             {
-                cs.CacheDependency = CacheHelper.GetCacheDependency(
-                    $"contentitem|byguid|{itemGuid}|{languageName}");
+                return result;
             }
+
+            cs.CacheDependency = CacheHelper.GetCacheDependency(
+                $"contentitem|byguid|{itemGuid}|{languageName}");
+
 
             return result;
         }, cacheSettings, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<TSchema>> GetAllBySchema<TSchema>(string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
@@ -217,13 +233,11 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
 
         var builder = new ContentItemQueryBuilder();
 
-        builder.ForContentTypes(parameters =>
-        {
-            parameters.When(maxLinkedItems > 0, linkItemOptions => linkItemOptions.WithLinkedItems(maxLinkedItems));
-            // Retrieves all items with the given reusable schema
+        builder.ForContentTypes(parameters => parameters
+            .When(maxLinkedItems > 0, linkItemOptions => linkItemOptions.WithLinkedItems(maxLinkedItems))
+            .OfReusableSchema(schemaName).WithContentTypeFields()).When(!string.IsNullOrEmpty(languageName),
+            lang => lang.InLanguage(languageName));
 
-            parameters.OfReusableSchema(schemaName).WithContentTypeFields();
-        }).When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
         var queryOptions = GetQueryExecutionOptions();
 
         if (WebsiteChannelContext.IsPreview)
@@ -242,16 +256,20 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
             var result = (await Executor.GetMappedResult<TSchema>(builder, queryOptions,
                 cancellationToken: ct))?.ToList() ?? [];
 
-            if (cs.Cached = result.Count > 0)
+            cs.BoolCondition = result.Count > 0;
+
+            if (!cs.Cached)
             {
-                cs.CacheDependency = CacheHelper.GetCacheDependency(
-                    $"{schemaName}|all");
+                return result;
             }
+
+            cs.CacheDependency = CacheHelper.GetCacheDependency($"{schemaName}|all");
 
             return result;
         }, cacheSettings, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<TEntity?> GetByIdAsync(int id, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
@@ -259,14 +277,12 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentType(contentType
-            , config =>
-            {
-                config.When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems));
-                // Retrieves all items with the given reusable schema
-                config.Where(cwhere =>
-                        cwhere.WhereEquals(nameof(IContentItemFieldsSource.SystemFields.ContentItemID), id))
-                    .TopN(1);
-            }).When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+                , config => config
+                    .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+                    .Where(where =>
+                        where.WhereEquals(nameof(IContentItemFieldsSource.SystemFields.ContentItemID), id))
+                    .TopN(1))
+            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
         var queryOptions = GetQueryExecutionOptions();
 
@@ -287,10 +303,15 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
             var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
                 cancellationToken: ct)).FirstOrDefault();
 
-            if (cs.Cached = result != null)
+            cs.BoolCondition = result != null;
+
+            if (!cs.Cached)
             {
-                cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKey());
+                return result;
             }
+
+            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKey());
+
 
             return result;
         }, cacheSettings, cancellationToken);
@@ -328,10 +349,15 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
             var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
                 cancellationToken: ct)).FirstOrDefault();
 
-            if (cs.Cached = result != null)
+            cs.BoolCondition = result != null;
+
+            if (!cs.Cached)
             {
-                cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKey());
+                return result;
             }
+
+            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKey());
+
 
             return result;
         }, cacheSettings, cancellationToken);
@@ -371,11 +397,16 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
                 cancellationToken: ct)).FirstOrDefault(x =>
                 string.Equals(x.SystemFields.ContentItemName, name, StringComparison.OrdinalIgnoreCase));
 
-            if (cs.Cached = result != null)
+            cs.BoolCondition = result != null;
+
+            if (!cs.Cached)
             {
-                cs.CacheDependency = CacheHelper.GetCacheDependency(
-                    $"contentitem|bycontenttype|{contentType}|{languageName}");
+                return result;
             }
+
+            cs.CacheDependency = CacheHelper.GetCacheDependency(
+                $"contentitem|bycontenttype|{contentType}|{languageName}");
+
 
             return result;
         }, cacheSettings, cancellationToken);
@@ -389,8 +420,8 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(config => config
-                .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
-                .OfContentType(contentType));
+            .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+            .OfContentType(contentType));
 
         var queryOptions = GetQueryExecutionOptions();
 
@@ -409,10 +440,14 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
             var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
                 cancellationToken: ct))?.ToList() ?? [];
 
-            if (cs.Cached = result.Count > 0)
+            cs.BoolCondition = result.Count > 0;
+
+            if (!cs.Cached)
             {
-                cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
+                return result;
             }
+
+            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
 
             return result;
         }, cacheSettings, cancellationToken);
@@ -426,8 +461,8 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(config => config
-                .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
-                .OfContentType(contentType));
+            .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+            .OfContentType(contentType));
 
         var queryOptions = GetQueryExecutionOptions();
 
@@ -446,10 +481,14 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
             var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
                 cancellationToken: ct))?.ToList() ?? [];
 
-            if (cs.Cached = result.Count > 0)
+            cs.BoolCondition = result.Count > 0;
+
+            if (!cs.Cached)
             {
-                cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
+                return result;
             }
+
+            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
 
             return result;
         }, cacheSettings, cancellationToken);
@@ -464,9 +503,9 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(config => config
-                .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
-                .OfContentType(contentTypes)
-                .InSmartFolder(smartFolderId));
+            .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+            .OfContentType(contentTypes)
+            .InSmartFolder(smartFolderId));
 
         var queryOptions = GetQueryExecutionOptions();
 
@@ -485,11 +524,14 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
             var result = (await Executor.GetMappedResult<IContentItemFieldsSource>(builder, queryOptions,
                 cancellationToken: ct))?.ToList() ?? [];
 
-            if (cs.Cached = result.Count > 0)
+            cs.BoolCondition = result.Count > 0;
+
+            if (!cs.Cached)
             {
-                cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
+                return result;
             }
 
+            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
             return result;
         }, cacheSettings, cancellationToken);
     }
@@ -506,9 +548,9 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(config => config
-                .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
-                .OfContentType(contentTypes)
-                .InSmartFolder(smartFolderId));
+            .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+            .OfContentType(contentTypes)
+            .InSmartFolder(smartFolderId));
 
         var queryOptions = GetQueryExecutionOptions();
 
@@ -527,10 +569,14 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
             var result = (await Executor.GetMappedResult<IContentItemFieldsSource>(builder, queryOptions,
                 cancellationToken: ct))?.ToList() ?? [];
 
-            if (cs.Cached = result.Count > 0)
+            cs.BoolCondition = result.Count > 0;
+
+            if (!cs.Cached)
             {
-                cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
+                return result;
             }
+
+            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
 
             return result;
         }, cacheSettings, cancellationToken);
@@ -549,9 +595,9 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(config => config
-                .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
-                .OfContentType(contentTypes)
-                .InSmartFolder(smartFolderId));
+            .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+            .OfContentType(contentTypes)
+            .InSmartFolder(smartFolderId));
 
         var queryOptions = GetQueryExecutionOptions();
 
@@ -570,10 +616,15 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
             var result = (await Executor.GetMappedResult<IContentItemFieldsSource>(builder, queryOptions,
                 cancellationToken: ct))?.ToList() ?? [];
 
-            if (cs.Cached = result.Count > 0)
+
+            cs.BoolCondition = result.Count > 0;
+
+            if (!cs.Cached)
             {
-                cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
+                return result;
             }
+
+            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
 
             return result;
         }, cacheSettings, cancellationToken);
@@ -592,9 +643,9 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(config => config
-                .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
-                .OfContentType(contentTypes)
-                .InSmartFolder(smartFolderId));
+            .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+            .OfContentType(contentTypes)
+            .InSmartFolder(smartFolderId));
 
         var queryOptions = GetQueryExecutionOptions();
 
@@ -613,10 +664,14 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
             var result = (await Executor.GetMappedResult<IContentItemFieldsSource>(builder, queryOptions,
                 cancellationToken: ct))?.ToList() ?? [];
 
-            if (cs.Cached = result.Count > 0)
+            cs.BoolCondition = result.Count > 0;
+
+            if (!cs.Cached)
             {
-                cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
+                return result;
             }
+
+            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
 
             return result;
         }, cacheSettings, cancellationToken);
@@ -631,14 +686,18 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
 
         var tagIdents = tagIdentifiers?.ToList() ?? [];
 
+        if (tagIdents.Count == 0)
+        {
+            return [];
+        }
+
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentType(contentType, config =>
             config
                 .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                        linkOptions => linkOptions.IncludeWebPageData())).Where(tagIdents.Count > 0
-                    ? where => where.WhereContainsTags(columnName, tagIdents)
-                    : null));
+                    linkOptions => linkOptions.IncludeWebPageData()))
+                .Where(where => where.WhereContainsTags(columnName, tagIdents)));
 
         var queryOptions = GetQueryExecutionOptions();
 
@@ -657,10 +716,14 @@ public sealed class ContentTypeRepository<TEntity> : BaseRepository, IContentRep
             var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
                 cancellationToken: ct))?.ToList() ?? [];
 
-            if (cs.Cached = result.Count > 0)
+            cs.BoolCondition = result.Count > 0;
+
+            if (!cs.Cached)
             {
-                cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
+                return result;
             }
+
+            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
 
             return result;
         }, cacheSettings, cancellationToken);
