@@ -1,6 +1,6 @@
 # XperienceCommunity.DataRepository
 
-XperienceCommunity.DataRepository is a library designed to simplify data access and management within applications built on Xperience by Kentico. This library provides a repository pattern implementation, enabling developers to perform CRUD (Create, Read, Update, Delete) operations in a more structured and maintainable way.
+XperienceCommunity.DataRepository is a library designed to simplify data access and management within applications built on Xperience by Kentico. This library provides a repository pattern implementation, enabling developers to perform data access operations in a more structured and maintainable way.
 
 ## Quick Start
 
@@ -70,12 +70,7 @@ Distributed under the MIT License. See [`LICENSE.md`](./LICENSE.md) for more inf
 
 ## Support
 
-This project has **Full support by 7-day bug-fix policy**.
-
-See [`SUPPORT.md`](https://github.com/Kentico/.github/blob/main/SUPPORT.md#full-support) for more information.
-
-For any security issues see [`SECURITY.md`](https://github.com/Kentico/.github/blob/main/SECURITY.md).
----Select the correct badge for the support policy and update the GitHub Action pipeline badge to point to this repository (replace `repo-template`)---
+This contribution is not directly supported or maintained by Kentico. It serves to illustrate some specific functionality or is a proof of concept for a specific version of the product. Feel free to contribute yourself, file an issue, fix bugs, but Kentico does not guarantee any assistance nor support.
 
 [![Kentico Labs](https://img.shields.io/badge/Kentico_Labs-grey?labelColor=orange&logo=data:image/svg+xml;base64,PHN2ZyBjbGFzcz0ic3ZnLWljb24iIHN0eWxlPSJ3aWR0aDogMWVtOyBoZWlnaHQ6IDFlbTt2ZXJ0aWNhbC1hbGlnbjogbWlkZGxlO2ZpbGw6IGN1cnJlbnRDb2xvcjtvdmVyZmxvdzogaGlkZGVuOyIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik05NTYuMjg4IDgwNC40OEw2NDAgMjc3LjQ0VjY0aDMyYzE3LjYgMCAzMi0xNC40IDMyLTMycy0xNC40LTMyLTMyLTMyaC0zMjBjLTE3LjYgMC0zMiAxNC40LTMyIDMyczE0LjQgMzIgMzIgMzJIMzg0djIxMy40NEw2Ny43MTIgODA0LjQ4Qy00LjczNiA5MjUuMTg0IDUxLjIgMTAyNCAxOTIgMTAyNGg2NDBjMTQwLjggMCAxOTYuNzM2LTk4Ljc1MiAxMjQuMjg4LTIxOS41MnpNMjQxLjAyNCA2NDBMNDQ4IDI5NS4wNFY2NGgxMjh2MjMxLjA0TDc4Mi45NzYgNjQwSDI0MS4wMjR6IiAgLz48L3N2Zz4=)](https://github.com/Kentico/.github/blob/main/SUPPORT.md#labs-limited-support) [![CI: Build and Test](https://github.com/brandonhenricks/xperience-by-kentico-data-repository/actions/workflows/ci.yml/badge.svg)](https://github.com/brandonhenricks/xperience-by-kentico-data-repository/actions/workflows/ci.yml)
 
@@ -106,15 +101,13 @@ XperienceCommunity.DataRepository is a library designed to simplify data access 
 
 ### Library Version Matrix
 
----This matrix explains which versions of the library are compatible with different versions of Xperience by Kentico / Kentico Xperience 13---
+- This matrix explains which versions of the library are compatible with different versions of Xperience by Kentico / Kentico Xperience 13---
 
 | Xperience Version | Library Version |
 | ----------------- | --------------- |
 | >= 29.6.0         | 1.0.0           |
 
 ### Dependencies
-
----These are all the dependencies required to use (not build) the library---
 
 - [ASP.NET Core 8.0](https://dotnet.microsoft.com/en-us/download)
 - [Xperience by Kentico](https://docs.kentico.com)
