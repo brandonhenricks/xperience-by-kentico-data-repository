@@ -11,13 +11,13 @@ namespace XperienceCommunity.DataRepository;
 
 public sealed class MediaFileRepository : IMediaFileRepository
 {
-    private readonly IProgressiveCache _cache;
-    private readonly int _cacheMinutes;
+    private readonly IProgressiveCache cache;
+    private readonly int cacheMinutes;
 
     public MediaFileRepository(IProgressiveCache cache, RepositoryOptions options)
     {
-        _cache = cache;
-        _cacheMinutes = options?.CacheMinutes ?? 10;
+        this.cache = cache;
+        cacheMinutes = options?.CacheMinutes ?? 10;
     }
 
     public async Task<ImmutableList<MediaFileInfo>> GetAssetsFromRelatedItemsAsync(IEnumerable<AssetRelatedItem> items,
@@ -30,7 +30,7 @@ public sealed class MediaFileRepository : IMediaFileRepository
             return [];
         }
 
-        return await _cache.LoadAsync(
+        return await cache.LoadAsync(
             async (cacheSettings, ct) =>
             {
                 var results = (await new ObjectQuery<MediaFileInfo>()
@@ -47,7 +47,7 @@ public sealed class MediaFileRepository : IMediaFileRepository
                 return results.ToImmutableList();
             },
             new CacheSettings(
-                cacheMinutes: _cacheMinutes,
+                cacheMinutes: cacheMinutes,
                 useSlidingExpiration: true,
                 cacheItemNameParts:
                 [
@@ -69,7 +69,7 @@ public sealed class MediaFileRepository : IMediaFileRepository
             return [];
         }
 
-        return await _cache.LoadAsync(
+        return await cache.LoadAsync(
             async (cacheSettings, ct) =>
             {
                 var results = (await new ObjectQuery<MediaFileInfo>()
@@ -86,7 +86,7 @@ public sealed class MediaFileRepository : IMediaFileRepository
                 return results.ToImmutableList();
             },
             new CacheSettings(
-                cacheMinutes: _cacheMinutes,
+                cacheMinutes: cacheMinutes,
                 useSlidingExpiration: true,
                 cacheItemNameParts:
                 [
