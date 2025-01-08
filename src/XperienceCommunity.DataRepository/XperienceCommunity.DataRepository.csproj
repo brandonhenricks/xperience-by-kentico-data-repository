@@ -4,10 +4,11 @@
 		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<NoWarn>$(NoWarn);NU1504;NU1505;NU1506;NU1701;1591</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="SonarAnalyzer.CSharp" />
-		<PackageReference Include="Kentico.Xperience.Core" />
+		<PackageReference Include="SonarAnalyzer.CSharp" PrivateAssets="all"/>
+		<PackageReference Include="Kentico.Xperience.Core" PrivateAssets="all"/>
 	</ItemGroup>
 </Project>
