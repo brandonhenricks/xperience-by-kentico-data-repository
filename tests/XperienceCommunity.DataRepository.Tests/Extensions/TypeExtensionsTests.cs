@@ -164,7 +164,7 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions
             var result = source.GetRelatedWebPageGuids(x => x.RelatedItem);
 
             // Assert
-            Assert.That(result, Is.EquivalentTo(new[] { guid }));
+            Assert.That(result, Is.EquivalentTo([guid]));
         }
 
         [Test]
