@@ -144,7 +144,7 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions
 
             var result = source.ToTypedList<TestContentItemFieldsSource>();
 
-            Assert.That(result.Count, Is.EqualTo(2));
+            Assert.That(result, Has.Count.EqualTo(2));
         }
 
         public class TestContentItemFieldsSource : IContentItemFieldsSource
