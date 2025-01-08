@@ -56,7 +56,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         }
 
         var builder = new ContentItemQueryBuilder()
-            .ForContentType(contentType,
+            .ForContentType<TEntity>(
                 config =>
                     config
                         .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
@@ -86,7 +86,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         }
 
         var builder = new ContentItemQueryBuilder()
-            .ForContentType(contentType,
+            .ForContentType<TEntity>(
                 config =>
                     config
                         .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
