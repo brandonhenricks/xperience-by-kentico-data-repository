@@ -36,35 +36,10 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var queryOptions = GetQueryExecutionOptions();
+        var result = await ExecutePageQuery<TEntity>(builder, () => CacheDependencyHelper.CreateWebPageItemTypeCacheDependency([contentType], WebsiteChannelContext.WebsiteChannelName),
+            cancellationToken, CachePrefix, nameof(GetAllAsync), languageName ?? string.Empty, contentType, maxLinkedItems);
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            return await Executor.GetMappedWebPageResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-        }
-
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetAllAsync)}|{languageName}|{maxLinkedItems}");
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedWebPageResult<TEntity>(builder, queryOptions,
-                cancellationToken: ct))?.ToList() ?? [];
-
-            cs.BoolCondition = result.Count > 0;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(
-                $"webpageitem|bychannel|{WebsiteChannelContext.WebsiteChannelName}|bycontenttype|{contentType}");
-
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result;
     }
 
     public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<Guid> nodeGuid, string? languageName,
@@ -92,41 +67,23 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
                                 guidList)))
             .When(!string.IsNullOrEmpty(languageName), options => options.InLanguage(languageName));
 
-        var queryOptions = GetQueryExecutionOptions();
+        var result = await ExecutePageQuery<TEntity>(builder, () => CacheDependencyHelper.CreateWebPageItemGUIDCacheDependency(guidList),
+            cancellationToken, CachePrefix, nameof(GetAllAsync), guidList, languageName ?? string.Empty, contentType, maxLinkedItems);
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            return await Executor.GetMappedWebPageResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-        }
-
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetAllAsync)}|{guidList.GetHashCode()}|{languageName}|{maxLinkedItems}");
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedWebPageResult<TEntity>(builder, queryOptions,
-                cancellationToken: ct))?.ToList() ?? [];
-
-            cs.BoolCondition = result.Count > 0;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(
-                $"webpageitem|bychannel|{WebsiteChannelContext.WebsiteChannelName}|bycontenttype|{contentType}");
-
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result;
     }
 
     public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<int> itemIds, string? languageName,
         int maxLinkedItems = 0, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
+
+        int[] itemIdList = itemIds?.ToArray() ?? [];
+
+        if (itemIdList.Length == 0)
+        {
+            return [];
+        }
 
         var builder = new ContentItemQueryBuilder()
             .ForContentType(contentType,
@@ -136,40 +93,13 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
                             linkOptions => linkOptions.IncludeWebPageData()))
                         .OrderBy(OrderByColumn.Asc(nameof(IWebPageFieldsSource.SystemFields.WebPageItemOrder)))
                         .Where(where =>
-                            where.WhereIn(nameof(IWebPageFieldsSource.SystemFields.WebPageItemID), itemIds)))
+                            where.WhereIn(nameof(IWebPageFieldsSource.SystemFields.WebPageItemID), itemIdList)))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var queryOptions = GetQueryExecutionOptions();
+        var result = await ExecutePageQuery<TEntity>(builder, () => CacheDependencyHelper.CreateWebPageItemIDCacheDependency(itemIdList),
+            cancellationToken, CachePrefix, nameof(GetAllAsync), itemIdList, languageName ?? string.Empty, contentType, maxLinkedItems);
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            var result = await Executor.GetMappedWebPageResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-
-            return result;
-        }
-
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetAllAsync)}|{itemIds.GetHashCode()}|{languageName}|{maxLinkedItems}");
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedWebPageResult<TEntity>(builder, queryOptions,
-                cancellationToken: ct))?.ToList() ?? [];
-
-            cs.BoolCondition = result.Count > 0;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency =
-                CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
-
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result;
     }
 
     public async Task<IEnumerable<TSchema>> GetAllBySchema<TSchema>(string? languageName, int maxLinkedItems = 0,
@@ -240,7 +170,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
         var result = await ExecutePageQuery<TEntity>(builder, () => CacheDependencyHelper.CreateWebPageItemGUIDCacheDependency([itemGuid]),
-            cancellationToken, CachePrefix, nameof(GetByPathAsync), itemGuid, contentType, maxLinkedItems);
+            cancellationToken, CachePrefix, nameof(GetByGuidAsync), itemGuid, contentType, maxLinkedItems);
 
         return result.FirstOrDefault();
     }
@@ -264,7 +194,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
         var result = await ExecutePageQuery<TEntity>(builder, () => CacheDependencyHelper.CreateWebPageItemIDCacheDependency([id]),
-            cancellationToken, CachePrefix, nameof(GetByPathAsync), id, contentType, maxLinkedItems);
+            cancellationToken, CachePrefix, nameof(GetByIdAsync), id, contentType, maxLinkedItems);
 
         return result.FirstOrDefault();
     }
@@ -401,7 +331,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
                         .Where(where => where.WhereContainsTags(columnName,
                                 guidList)));
 
-        var result = await ExecutePageQuery<TEntity>(builder, () => CacheDependencyHelper.CreateWebPageItemGUIDCacheDependency(tagIdentifiers!),
+        var result = await ExecutePageQuery<TEntity>(builder, () => CacheDependencyHelper.CreateWebPageItemGUIDCacheDependency(guidList!),
             cancellationToken, CachePrefix, nameof(GetByTagsAsync), columnName, guidList, maxLinkedItems);
 
         return result;
