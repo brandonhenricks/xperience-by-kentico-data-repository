@@ -17,6 +17,8 @@ public static class ContentItemQueryBuilderExtensions
     {
         string contentType = typeof(T).GetContentTypeName() ?? string.Empty;
 
+        ArgumentException.ThrowIfNullOrEmpty(contentType);
+
         return source.ForContentType(contentType, configureQuery);
     }
 
