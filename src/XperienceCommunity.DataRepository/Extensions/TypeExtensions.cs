@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 
 using CMS.ContentEngine;
+using CMS.MediaLibrary;
 using CMS.Websites;
 
 #pragma warning disable IDE0060 // Remove unused parameter
@@ -106,6 +107,104 @@ public static class TypeExtensions
     }
 
     /// <summary>
+    /// Finds the specified property of type <see cref="IEnumerable{AssetRelatedItem}"/> or <see cref="AssetRelatedItem"/>
+    /// and returns all GUIDs from the <see cref="AssetRelatedItem.Identifier"/> property.
+    /// </summary>
+    /// <typeparam name="T">The type that implements <see cref="IContentItemFieldsSource"/>.</typeparam>
+    /// <param name="source">The source object to search for properties.</param>
+    /// <param name="propertyExpression">The expression specifying the property to search.</param>
+    /// <returns>A collection of GUIDs from the <see cref="AssetRelatedItem.Identifier"/> property.</returns>
+    public static IEnumerable<Guid> GetRelatedAssetItemGuids<T>(this T source, Expression<Func<T, object>> propertyExpression) where T : IContentItemFieldsSource
+    {
+        var guids = new List<Guid>();
+
+        if (propertyExpression.Body is MemberExpression memberExpression)
+        {
+            var property = memberExpression.Member as PropertyInfo;
+
+            if (property == null)
+            {
+                return [];
+            }
+
+            if (property.PropertyType == typeof(AssetRelatedItem))
+            {
+                if (property.GetValue(source) is AssetRelatedItem item)
+                {
+                    guids.Add(item.Identifier);
+                }
+            }
+            else if (typeof(IEnumerable<AssetRelatedItem>).IsAssignableFrom(property.PropertyType))
+            {
+                if (property.GetValue(source) is IEnumerable<AssetRelatedItem> items)
+                {
+                    guids.AddRange(items.Select(item => item.Identifier));
+                }
+            }
+        }
+        else if (propertyExpression.Body is UnaryExpression unaryExpression && unaryExpression.Operand is MemberExpression unaryMemberExpression)
+        {
+            var property = unaryMemberExpression.Member as PropertyInfo;
+
+            if (property == null)
+            {
+                return guids;
+            }
+
+            if (property.PropertyType == typeof(AssetRelatedItem))
+            {
+                if (property.GetValue(source) is AssetRelatedItem item)
+                {
+                    guids.Add(item.Identifier);
+                }
+            }
+            else if (typeof(IEnumerable<AssetRelatedItem>).IsAssignableFrom(property.PropertyType))
+            {
+                if (property.GetValue(source) is IEnumerable<AssetRelatedItem> items)
+                {
+                    guids.AddRange(items.Select(item => item.Identifier));
+                }
+            }
+        }
+
+        return guids;
+    }
+
+    /// <summary>
+    /// Finds all properties of type <see cref="IEnumerable{AssetRelatedItem}"/> or <see cref="AssetRelatedItem"/>
+    /// and returns all GUIDs from the <see cref="AssetRelatedItem.Identifier"/> property.
+    /// </summary>
+    /// <typeparam name="T">The type that implements <see cref="IContentItemFieldsSource"/>.</typeparam>
+    /// <param name="source">The source object to search for properties.</param>
+    /// <returns>A collection of GUIDs from the <see cref="AssetRelatedItem.Identifier"/> property.</returns>
+    public static IEnumerable<Guid> GetRelatedAssetItemGuids<T>(this T source) where T : IContentItemFieldsSource
+    {
+        var guids = new List<Guid>();
+
+        var properties = typeof(T)?.GetProperties(BindingFlags.Public | BindingFlags.Instance) ?? [];
+
+        foreach (var property in properties)
+        {
+            if (property.PropertyType == typeof(AssetRelatedItem))
+            {
+                if (property.GetValue(source) is AssetRelatedItem item)
+                {
+                    guids.Add(item.Identifier);
+                }
+            }
+            else if (typeof(IEnumerable<AssetRelatedItem>).IsAssignableFrom(property.PropertyType))
+            {
+                if (property.GetValue(source) is IEnumerable<AssetRelatedItem> items)
+                {
+                    guids.AddRange(items.Select(item => item.Identifier));
+                }
+            }
+        }
+
+        return guids;
+    }
+
+    /// <summary>
     /// Finds the specified property of type <see cref="IEnumerable{WebPageRelatedItem}"/> or <see cref="WebPageRelatedItem"/>
     /// and returns all GUIDs from the <see cref="WebPageRelatedItem.WebPageGuid"/> property.
     /// </summary>
@@ -123,7 +222,7 @@ public static class TypeExtensions
 
             if (property == null)
             {
-                return guids;
+                return [];
             }
 
             if (property.PropertyType == typeof(WebPageRelatedItem))
@@ -199,7 +298,6 @@ public static class TypeExtensions
                 }
             }
         }
-
         return guids;
     }
 
