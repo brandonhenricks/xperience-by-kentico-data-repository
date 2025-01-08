@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Linq.Expressions;
 using System.Reflection;
 
 using CMS.ContentEngine;
@@ -103,6 +104,105 @@ public static class TypeExtensions
 
         return schemaName;
     }
+
+    /// <summary>
+    /// Finds the specified property of type <see cref="IEnumerable{WebPageRelatedItem}"/> or <see cref="WebPageRelatedItem"/>
+    /// and returns all GUIDs from the <see cref="WebPageRelatedItem.WebPageGuid"/> property.
+    /// </summary>
+    /// <typeparam name="T">The type that implements <see cref="IContentItemFieldsSource"/>.</typeparam>
+    /// <param name="source">The source object to search for properties.</param>
+    /// <param name="propertyExpression">The expression specifying the property to search.</param>
+    /// <returns>A collection of GUIDs from the <see cref="WebPageRelatedItem.WebPageGuid"/> property.</returns>
+    public static IEnumerable<Guid> GetRelatedWebPageGuids<T>(this T source, Expression<Func<T, object>> propertyExpression) where T : IContentItemFieldsSource
+    {
+        var guids = new List<Guid>();
+
+        if (propertyExpression.Body is MemberExpression memberExpression)
+        {
+            var property = memberExpression.Member as PropertyInfo;
+
+            if (property == null)
+            {
+                return guids;
+            }
+
+            if (property.PropertyType == typeof(WebPageRelatedItem))
+            {
+                if (property.GetValue(source) is WebPageRelatedItem item)
+                {
+                    guids.Add(item.WebPageGuid);
+                }
+            }
+            else if (typeof(IEnumerable<WebPageRelatedItem>).IsAssignableFrom(property.PropertyType))
+            {
+                if (property.GetValue(source) is IEnumerable<WebPageRelatedItem> items)
+                {
+                    guids.AddRange(items.Select(item => item.WebPageGuid));
+                }
+            }
+        }
+        else if (propertyExpression.Body is UnaryExpression unaryExpression && unaryExpression.Operand is MemberExpression unaryMemberExpression)
+        {
+            var property = unaryMemberExpression.Member as PropertyInfo;
+
+            if (property == null)
+            {
+                return guids;
+            }
+
+            if (property.PropertyType == typeof(WebPageRelatedItem))
+            {
+                if (property.GetValue(source) is WebPageRelatedItem item)
+                {
+                    guids.Add(item.WebPageGuid);
+                }
+            }
+            else if (typeof(IEnumerable<WebPageRelatedItem>).IsAssignableFrom(property.PropertyType))
+            {
+                if (property.GetValue(source) is IEnumerable<WebPageRelatedItem> items)
+                {
+                    guids.AddRange(items.Select(item => item.WebPageGuid));
+                }
+            }
+        }
+
+        return guids;
+    }
+
+    /// <summary>
+    /// Finds all properties of type <see cref="IEnumerable{WebPageRelatedItem}"/> or <see cref="WebPageRelatedItem"/>
+    /// and returns all GUIDs from the <see cref="WebPageRelatedItem.WebPageGuid"/> property.
+    /// </summary>
+    /// <typeparam name="T">The type that implements <see cref="IContentItemFieldsSource"/>.</typeparam>
+    /// <param name="source">The source object to search for properties.</param>
+    /// <returns>A collection of GUIDs from the <see cref="WebPageRelatedItem.WebPageGuid"/> property.</returns>
+    public static IEnumerable<Guid> GetRelatedWebPageGuids<T>(this T source) where T : IContentItemFieldsSource
+    {
+        var guids = new List<Guid>();
+
+        var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+        foreach (var property in properties)
+        {
+            if (property.PropertyType == typeof(WebPageRelatedItem))
+            {
+                if (property.GetValue(source) is WebPageRelatedItem item)
+                {
+                    guids.Add(item.WebPageGuid);
+                }
+            }
+            else if (typeof(IEnumerable<WebPageRelatedItem>).IsAssignableFrom(property.PropertyType))
+            {
+                if (property.GetValue(source) is IEnumerable<WebPageRelatedItem> items)
+                {
+                    guids.AddRange(items.Select(item => item.WebPageGuid));
+                }
+            }
+        }
+
+        return guids;
+    }
+
 
     /// <summary>
     /// Gets the content type name for a given type.

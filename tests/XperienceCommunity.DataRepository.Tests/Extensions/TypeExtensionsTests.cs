@@ -150,15 +150,72 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions
             Assert.That(result, Is.True);
         }
 
-        private class TestContentItemFieldsSource : IContentItemFieldsSource
+
+        [Test]
+        public void GetRelatedWebPageGuids_SingleItem_ReturnsGuid()
+        {
+            // Arrange
+            var guid = Guid.NewGuid();
+            var relatedItem = new WebPageRelatedItem { WebPageGuid = guid };
+
+            var source = new TestContentItemFieldsSource() { RelatedItem = relatedItem };
+
+            // Act
+            var result = source.GetRelatedWebPageGuids(x => x.RelatedItem);
+
+            // Assert
+            Assert.That(result, Is.EquivalentTo(new[] { guid }));
+        }
+
+        [Test]
+        public void GetRelatedWebPageGuids_MultipleItems_ReturnsGuids()
+        {
+            // Arrange
+            var guid1 = Guid.NewGuid();
+            var guid2 = Guid.NewGuid();
+
+            var relatedItems = new List<WebPageRelatedItem>
+            {
+                new() { WebPageGuid = guid1 },
+                new() { WebPageGuid = guid2 }
+            };
+
+            var source = new TestWebPageFieldsSource() { RelatedItems = relatedItems };
+
+
+            // Act
+            var result = source.GetRelatedWebPageGuids(x => x.RelatedItems);
+
+            // Assert
+            Assert.That(result, Is.EquivalentTo(new[] { guid1, guid2 }));
+        }
+
+        [Test]
+        public void GetRelatedWebPageGuids_NoItems_ReturnsEmpty()
+        {
+            // Arrange
+            var source = new TestWebPageFieldsSource();
+
+            // Act
+            var result = source.GetRelatedWebPageGuids(x => x.RelatedItems);
+
+            // Assert
+            Assert.That(result, Is.Empty);
+        }
+        public class TestContentItemFieldsSource : IContentItemFieldsSource
         {
             public static string CONTENT_TYPE_NAME = "TestContentItemFieldsSource";
+
+            public WebPageRelatedItem RelatedItem { get; set; } = new WebPageRelatedItem();
+
             public ContentItemFields SystemFields => throw new NotImplementedException();
         }
 
-        private class TestWebPageFieldsSource : IWebPageFieldsSource
+        public class TestWebPageFieldsSource : IWebPageFieldsSource
         {
             public static string CONTENT_TYPE_NAME = "TestWebPageFieldsSource";
+
+            public IEnumerable<WebPageRelatedItem> RelatedItems { get; set; } = [];
 
             public WebPageFields SystemFields => throw new NotImplementedException();
         }
