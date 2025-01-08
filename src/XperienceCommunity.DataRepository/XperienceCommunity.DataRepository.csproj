@@ -8,7 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="SonarAnalyzer.CSharp" PrivateAssets="all"/>
-		<PackageReference Include="Kentico.Xperience.Core" PrivateAssets="all"/>
+		<PackageReference Include="SonarAnalyzer.CSharp" PrivateAssets="all" />
+		<PackageReference Include="Kentico.Xperience.Core" PrivateAssets="all" />
 	</ItemGroup>
 </Project>
