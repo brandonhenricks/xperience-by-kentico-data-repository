@@ -3,6 +3,7 @@ using CMS.Helpers;
 using CMS.Websites.Routing;
 
 using XperienceCommunity.DataRepository.Extensions;
+using XperienceCommunity.DataRepository.Helpers;
 using XperienceCommunity.DataRepository.Interfaces;
 using XperienceCommunity.DataRepository.Models;
 
@@ -46,36 +47,11 @@ public sealed class ContentTypeRepository<TEntity>(
             .Where(where => where.WhereIn(nameof(IContentItemFieldsSource.SystemFields.ContentItemGUID),
                 guidList))).When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var queryOptions = GetQueryExecutionOptions();
+        var result = await ExecuteContentQuery<TEntity>(builder,
+            () => CacheDependencyHelper.CreateContentItemGUIDCacheDependency(guidList!),
+            cancellationToken, CachePrefix, nameof(GetAllAsync), guidList, maxLinkedItems);
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            return await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-        }
-
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetAllAsync)}|{guidList.GetHashCode()}|{languageName}|{maxLinkedItems}");
-
-        var cacheResult = await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: ct))?.ToList() ?? [];
-
-            cs.BoolCondition = result.Count > 0;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
-
-            return result;
-        }, cacheSettings, cancellationToken);
-
-        return cacheResult ?? [];
+        return result;
     }
 
     /// <inheritdoc />
@@ -99,36 +75,11 @@ public sealed class ContentTypeRepository<TEntity>(
                 .Where(where => where.WhereIn(nameof(IContentItemFieldsSource.SystemFields.ContentItemID), idList)))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var queryOptions = GetQueryExecutionOptions();
+        var result = await ExecuteContentQuery<TEntity>(builder,
+            () => CacheDependencyHelper.CreateContentItemIDCacheDependency(idList!),
+            cancellationToken, CachePrefix, nameof(GetAllAsync), idList, maxLinkedItems);
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            return await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-        }
-
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetAllAsync)}|{idList.GetHashCode()}|{languageName}|{maxLinkedItems}");
-
-        var cacheResult = await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: ct))?.ToList() ?? [];
-
-            cs.BoolCondition = result.Count > 0;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
-
-            return result;
-        }, cacheSettings, cancellationToken);
-
-        return cacheResult ?? [];
+        return result;
     }
 
     /// <inheritdoc />
@@ -151,26 +102,11 @@ public sealed class ContentTypeRepository<TEntity>(
                 cancellationToken: cancellationToken);
         }
 
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetAllAsync)}|{languageName}|{maxLinkedItems}");
+        var result = await ExecuteContentQuery<TEntity>(builder,
+            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency([contentType]),
+            cancellationToken, CachePrefix, nameof(GetAllAsync), contentType, maxLinkedItems);
 
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: ct))?.ToList() ?? [];
-
-
-            cs.BoolCondition = result.Count > 0;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result;
     }
 
     /// <inheritdoc />
@@ -184,9 +120,11 @@ public sealed class ContentTypeRepository<TEntity>(
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(parameters => parameters
-            .When(maxLinkedItems > 0, linkItemOptions => linkItemOptions.WithLinkedItems(maxLinkedItems))
-            .OfReusableSchema(schemaName).WithContentTypeFields()).When(!string.IsNullOrEmpty(languageName),
-            lang => lang.InLanguage(languageName));
+                .When(maxLinkedItems > 0, linkItemOptions => linkItemOptions.WithLinkedItems(maxLinkedItems))
+                .OfReusableSchema(schemaName)
+                .WithContentTypeFields())
+            .When(!string.IsNullOrEmpty(languageName),
+                lang => lang.InLanguage(languageName));
 
         var queryOptions = GetQueryExecutionOptions();
 
@@ -234,38 +172,13 @@ public sealed class ContentTypeRepository<TEntity>(
                 .TopN(1))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var queryOptions = GetQueryExecutionOptions();
+        var result = await ExecuteContentQuery<TEntity>(builder,
+            () => CacheDependencyHelper.CreateContentItemGUIDCacheDependency([itemGuid]),
+            cancellationToken, CachePrefix, nameof(GetByIdAsync), itemGuid, maxLinkedItems);
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            var query = await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-
-            return query.FirstOrDefault();
-        }
-
-        var cacheSettings =
-            new CacheSettings(CacheMinutes, nameof(GetByGuidAsync), languageName, maxLinkedItems);
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: ct)).FirstOrDefault();
-
-            cs.BoolCondition = result != null;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(
-                $"contentitem|byguid|{itemGuid}|{languageName}");
-
-
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result.FirstOrDefault();
     }
+
     /// <inheritdoc />
     public async Task<TEntity?> GetByIdAsync(int id, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
@@ -280,37 +193,11 @@ public sealed class ContentTypeRepository<TEntity>(
                 .TopN(1))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var queryOptions = GetQueryExecutionOptions();
+        var result = await ExecuteContentQuery<TEntity>(builder,
+            () => CacheDependencyHelper.CreateContentItemIDCacheDependency([id]),
+            cancellationToken, CachePrefix, nameof(GetByIdAsync), id, maxLinkedItems);
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            var query = await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-
-            return query.FirstOrDefault();
-        }
-
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetByIdAsync)}|{id}|{languageName}|{maxLinkedItems}");
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: ct)).FirstOrDefault();
-
-            cs.BoolCondition = result != null;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKey());
-
-
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result.FirstOrDefault();
     }
 
     public async Task<TEntity?> GetByIdentifierAsync(Guid id, string? languageName, int maxLinkedItems = 0,
@@ -325,37 +212,11 @@ public sealed class ContentTypeRepository<TEntity>(
                 .TopN(1))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var queryOptions = GetQueryExecutionOptions();
+        var result = await ExecuteContentQuery<TEntity>(builder,
+            () => CacheDependencyHelper.CreateContentItemGUIDCacheDependency([id]),
+            cancellationToken, CachePrefix, nameof(GetByIdentifierAsync), id, maxLinkedItems);
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            var query = await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-
-            return query.FirstOrDefault();
-        }
-
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetByIdentifierAsync)}|{id}|{languageName}|{maxLinkedItems}");
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: ct)).FirstOrDefault();
-
-            cs.BoolCondition = result != null;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKey());
-
-
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result.FirstOrDefault();
     }
 
     public async Task<TEntity?> GetByNameAsync(string name, string? languageName, int maxLinkedItems = 0,
@@ -371,40 +232,11 @@ public sealed class ContentTypeRepository<TEntity>(
                     .TopN(1))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var queryOptions = GetQueryExecutionOptions();
+        var result = await ExecuteContentQuery<TEntity>(builder,
+            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency([contentType]),
+            cancellationToken, CachePrefix, nameof(GetByNameAsync), name, maxLinkedItems);
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            var query = await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-
-            return query.FirstOrDefault(x =>
-                string.Equals(x.SystemFields.ContentItemName, name, StringComparison.OrdinalIgnoreCase));
-        }
-
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetByNameAsync)}|{name}|{languageName}|{maxLinkedItems}");
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: ct)).FirstOrDefault(x =>
-                string.Equals(x.SystemFields.ContentItemName, name, StringComparison.OrdinalIgnoreCase));
-
-            cs.BoolCondition = result != null;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(
-                $"contentitem|bycontenttype|{contentType}|{languageName}");
-
-
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result.FirstOrDefault();
     }
 
     public async Task<IEnumerable<TEntity>> GetBySmartFolderGuidAsync(Guid smartFolderId, int maxLinkedItems = 0,
@@ -419,34 +251,11 @@ public sealed class ContentTypeRepository<TEntity>(
             .OfContentType(contentType)
             .InSmartFolder(smartFolderId));
 
-        var queryOptions = GetQueryExecutionOptions();
+        var result = await ExecuteContentQuery<TEntity>(builder,
+            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency([contentType]),
+            cancellationToken, CachePrefix, nameof(GetBySmartFolderGuidAsync), smartFolderId, maxLinkedItems);
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            return await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-        }
-
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetBySmartFolderGuidAsync)}|{smartFolderId}|{maxLinkedItems}");
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: ct))?.ToList() ?? [];
-
-            cs.BoolCondition = result.Count > 0;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
-
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result;
     }
 
     public async Task<IEnumerable<TEntity>> GetBySmartFolderIdAsync(int smartFolderId, int maxLinkedItems = 0,
@@ -461,34 +270,12 @@ public sealed class ContentTypeRepository<TEntity>(
             .OfContentType(contentType)
             .InSmartFolder(smartFolderId));
 
-        var queryOptions = GetQueryExecutionOptions();
+        var result = await ExecuteContentQuery<TEntity>(builder,
+            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency([contentType]!),
+            cancellationToken, CachePrefix, nameof(GetBySmartFolderIdAsync), contentType, smartFolderId,
+            maxLinkedItems);
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            return await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-        }
-
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetBySmartFolderIdAsync)}|{smartFolderId}|{maxLinkedItems}");
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: ct))?.ToList() ?? [];
-
-            cs.BoolCondition = result.Count > 0;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
-
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result;
     }
 
     public async Task<IEnumerable<IContentItemFieldsSource>> GetBySmartFolderIdAsync<T1, T2>(int smartFolderId,
@@ -497,6 +284,11 @@ public sealed class ContentTypeRepository<TEntity>(
     {
         string?[] contentTypes = [typeof(T1).GetContentTypeName(), typeof(T2).GetContentTypeName()];
 
+        if (contentTypes.Length == 0)
+        {
+            return [];
+        }
+
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(config => config
@@ -504,33 +296,13 @@ public sealed class ContentTypeRepository<TEntity>(
             .OfContentType(contentTypes)
             .InSmartFolder(smartFolderId));
 
-        var queryOptions = GetQueryExecutionOptions();
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            return await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-        }
+        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder,
+            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency(contentTypes!),
+            cancellationToken, CachePrefix, nameof(GetBySmartFolderIdAsync), contentTypes, smartFolderId,
+            maxLinkedItems);
 
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetBySmartFolderIdAsync)}|{smartFolderId}|{maxLinkedItems}|{string.Join('|', contentTypes)}");
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedResult<IContentItemFieldsSource>(builder, queryOptions,
-                cancellationToken: ct))?.ToList() ?? [];
-
-            cs.BoolCondition = result.Count > 0;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result;
     }
 
     public async Task<IEnumerable<IContentItemFieldsSource>> GetBySmartFolderIdAsync<T1, T2, T3>(int smartFolderId,
@@ -542,6 +314,11 @@ public sealed class ContentTypeRepository<TEntity>(
             typeof(T1).GetContentTypeName(), typeof(T2).GetContentTypeName(), typeof(T3).GetContentTypeName()
         ];
 
+        if (contentTypes.Length == 0)
+        {
+            return [];
+        }
+
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(config => config
@@ -549,34 +326,13 @@ public sealed class ContentTypeRepository<TEntity>(
             .OfContentType(contentTypes)
             .InSmartFolder(smartFolderId));
 
-        var queryOptions = GetQueryExecutionOptions();
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            return await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-        }
+        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder,
+            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency(contentTypes!),
+            cancellationToken, CachePrefix, nameof(GetBySmartFolderIdAsync), contentTypes, smartFolderId,
+            maxLinkedItems);
 
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetBySmartFolderIdAsync)}|{smartFolderId}|{maxLinkedItems}|{string.Join('|', contentTypes)}");
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedResult<IContentItemFieldsSource>(builder, queryOptions,
-                cancellationToken: ct))?.ToList() ?? [];
-
-            cs.BoolCondition = result.Count > 0;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
-
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result;
     }
 
     public async Task<IEnumerable<IContentItemFieldsSource>> GetBySmartFolderIdAsync<T1, T2, T3, T4>(
@@ -589,6 +345,11 @@ public sealed class ContentTypeRepository<TEntity>(
             typeof(T4).GetContentTypeName()
         ];
 
+        if (contentTypes.Length == 0)
+        {
+            return [];
+        }
+
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(config => config
@@ -596,35 +357,13 @@ public sealed class ContentTypeRepository<TEntity>(
             .OfContentType(contentTypes)
             .InSmartFolder(smartFolderId));
 
-        var queryOptions = GetQueryExecutionOptions();
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            return await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-        }
+        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder,
+            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency(contentTypes!),
+            cancellationToken, CachePrefix, nameof(GetBySmartFolderIdAsync), contentTypes, smartFolderId,
+            maxLinkedItems);
 
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetBySmartFolderIdAsync)}|{smartFolderId}|{maxLinkedItems}|{string.Join('|', contentTypes)}");
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedResult<IContentItemFieldsSource>(builder, queryOptions,
-                cancellationToken: ct))?.ToList() ?? [];
-
-
-            cs.BoolCondition = result.Count > 0;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
-
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result;
     }
 
     public async Task<IEnumerable<IContentItemFieldsSource>> GetBySmartFolderIdAsync<T1, T2, T3, T4, T5>(
@@ -637,6 +376,11 @@ public sealed class ContentTypeRepository<TEntity>(
             typeof(T4).GetContentTypeName(), typeof(T5).GetContentTypeName()
         ];
 
+        if (contentTypes.Length == 0)
+        {
+            return [];
+        }
+
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(config => config
@@ -644,34 +388,13 @@ public sealed class ContentTypeRepository<TEntity>(
             .OfContentType(contentTypes)
             .InSmartFolder(smartFolderId));
 
-        var queryOptions = GetQueryExecutionOptions();
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            return await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-        }
+        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder,
+            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency(contentTypes!),
+            cancellationToken, CachePrefix, nameof(GetBySmartFolderIdAsync), contentTypes, smartFolderId,
+            maxLinkedItems);
 
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetBySmartFolderIdAsync)}|{smartFolderId}|{maxLinkedItems}|{string.Join('|', contentTypes)}");
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedResult<IContentItemFieldsSource>(builder, queryOptions,
-                cancellationToken: ct))?.ToList() ?? [];
-
-            cs.BoolCondition = result.Count > 0;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
-
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result;
     }
 
     public async Task<IEnumerable<TEntity>> GetByTagsAsync(string columnName, IEnumerable<Guid> tagIdentifiers,

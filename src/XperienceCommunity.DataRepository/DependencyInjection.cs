@@ -26,7 +26,7 @@ public static class DependencyInjection
         }
         else
         {
-            services.Configure<RepositoryOptions>(options => options.CacheMinutes = 60);
+            services.Configure<RepositoryOptions>(config => config.CacheMinutes = 60);
         }
 
         services.TryAddScoped(typeof(IContentRepository<>), typeof(ContentTypeRepository<>));
