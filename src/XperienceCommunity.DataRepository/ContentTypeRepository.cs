@@ -419,33 +419,11 @@ public sealed class ContentTypeRepository<TEntity>(
                     linkOptions => linkOptions.IncludeWebPageData()))
                 .Where(where => where.WhereContainsTags(columnName, tagIdents)));
 
-        var queryOptions = GetQueryExecutionOptions();
+        var result = await ExecuteContentQuery<TEntity>(builder,
+            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency([contentType]),
+            cancellationToken, CachePrefix, nameof(GetByTagsAsync), contentType, columnName,
+            maxLinkedItems);
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            return await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-        }
-
-        var cacheSettings =
-            new CacheSettings(CacheMinutes,
-                $"{CachePrefix}|{nameof(GetByTagsAsync)}|{tagIdents.GetHashCode()}|{maxLinkedItems}");
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: ct))?.ToList() ?? [];
-
-            cs.BoolCondition = result.Count > 0;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(result.GetCacheDependencyKeys());
-
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result;
     }
 }
