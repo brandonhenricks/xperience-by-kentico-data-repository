@@ -7,6 +7,16 @@
 		<NoWarn>$(NoWarn);NU1504;NU1505;NU1506;NU1701;1591;S1066</NoWarn>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<PackageId>XperienceCommunity.DataRepository</PackageId>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/brandonhenricks/xperience-by-kentico-data-repository</RepositoryUrl>
+		<Authors>Brandon Henricks</Authors>
+		<Description>XperienceCommunity.DataRepository simplifies data access and management within applications built on Xperience by Kentico by providing a repository pattern implementation. It supports .NET 8 and .NET 9, enabling developers to perform CRUD operations in a structured and maintainable way.</Description>
+		<IncludeSymbols>True</IncludeSymbols>
+		<AnalysisLevel>latest</AnalysisLevel>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Include="SonarAnalyzer.CSharp" PrivateAssets="all" />
 		<PackageReference Include="Kentico.Xperience.Core" PrivateAssets="all" />
