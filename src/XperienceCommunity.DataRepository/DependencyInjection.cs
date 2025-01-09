@@ -33,6 +33,8 @@ public static class DependencyInjection
 
         services.TryAddScoped(typeof(IPageRepository<>), typeof(PageTypeRepository<>));
 
+        services.TryAddScoped<IMediaFileRepository, MediaFileRepository>();
+
         return services;
     }
 }
