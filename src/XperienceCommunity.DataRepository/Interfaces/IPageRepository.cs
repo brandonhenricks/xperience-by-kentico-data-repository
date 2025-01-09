@@ -17,6 +17,7 @@ public interface IPageRepository<TEntity> : IRepository<TEntity> where TEntity :
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty, or Path is Empty.</exception>
     Task<IEnumerable<TEntity>> GetByPathAsync(string path, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
@@ -29,6 +30,7 @@ public interface IPageRepository<TEntity> : IRepository<TEntity> where TEntity :
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty, or Path is Empty.</exception>
     Task<IEnumerable<IWebPageFieldsSource>> GetByPathAsync<T1, T2>(string path, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
@@ -40,6 +42,7 @@ public interface IPageRepository<TEntity> : IRepository<TEntity> where TEntity :
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty, or Path is Empty.</exception>
     Task<IEnumerable<IWebPageFieldsSource>> GetByPathAsync<T1, T2, T3>(string path, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
@@ -51,6 +54,7 @@ public interface IPageRepository<TEntity> : IRepository<TEntity> where TEntity :
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty, or Path is Empty.</exception>
     Task<IEnumerable<IWebPageFieldsSource>> GetByPathAsync<T1, T2, T3, T4>(string path, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 }

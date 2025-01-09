@@ -21,6 +21,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
     public override string CachePrefix => $"data|{contentType}|{WebsiteChannelContext.WebsiteChannelName}";
 
+    /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetAllAsync(string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
@@ -42,6 +43,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         return result;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<Guid> nodeGuid, string? languageName,
         int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
@@ -73,6 +75,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         return result;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<int> itemIds, string? languageName,
         int maxLinkedItems = 0, CancellationToken cancellationToken = default)
     {
@@ -102,6 +105,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         return result;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<TSchema>> GetAllBySchema<TSchema>(string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
@@ -150,6 +154,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         }, cacheSettings, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<TEntity?> GetByGuidAsync(Guid itemGuid, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
@@ -175,6 +180,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         return result.FirstOrDefault();
     }
 
+    /// <inheritdoc />
     public async Task<TEntity?> GetByIdAsync(int id, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
@@ -199,6 +205,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         return result.FirstOrDefault();
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetByPathAsync(string path, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
@@ -220,6 +227,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         return result;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<IWebPageFieldsSource>> GetByPathAsync<T1, T2>(string path, string? languageName,
         int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
@@ -250,6 +258,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         return result;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<IWebPageFieldsSource>> GetByPathAsync<T1, T2, T3>(string path, string? languageName,
         int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
@@ -280,6 +289,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         return result;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<IWebPageFieldsSource>> GetByPathAsync<T1, T2, T3, T4>(string path,
         string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
@@ -311,6 +321,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         return result;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetByTagsAsync(string columnName, IEnumerable<Guid> tagIdentifiers,
                                                 int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)

@@ -126,35 +126,11 @@ public sealed class ContentTypeRepository<TEntity>(
             .When(!string.IsNullOrEmpty(languageName),
                 lang => lang.InLanguage(languageName));
 
-        var queryOptions = GetQueryExecutionOptions();
+        var result = await ExecuteContentQuery<TSchema>(builder,
+            () => CacheHelper.GetCacheDependency($"{schemaName}|all"),
+            cancellationToken, CachePrefix, nameof(GetAllBySchema), schemaName, maxLinkedItems);
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            var query = await Executor.GetMappedResult<TSchema>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-
-            return query;
-        }
-
-        var cacheSettings =
-            new CacheSettings(CacheMinutes, nameof(GetAllBySchema), schemaName, languageName, maxLinkedItems);
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedResult<TSchema>(builder, queryOptions,
-                cancellationToken: ct))?.ToList() ?? [];
-
-            cs.BoolCondition = result.Count > 0;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency($"{schemaName}|all");
-
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result;
     }
 
     /// <inheritdoc />
@@ -200,6 +176,7 @@ public sealed class ContentTypeRepository<TEntity>(
         return result.FirstOrDefault();
     }
 
+    /// <inheritdoc />
     public async Task<TEntity?> GetByIdentifierAsync(Guid id, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
@@ -219,6 +196,7 @@ public sealed class ContentTypeRepository<TEntity>(
         return result.FirstOrDefault();
     }
 
+    /// <inheritdoc />
     public async Task<TEntity?> GetByNameAsync(string name, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
@@ -239,6 +217,7 @@ public sealed class ContentTypeRepository<TEntity>(
         return result.FirstOrDefault();
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetBySmartFolderGuidAsync(Guid smartFolderId, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
@@ -258,6 +237,7 @@ public sealed class ContentTypeRepository<TEntity>(
         return result;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetBySmartFolderIdAsync(int smartFolderId, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
     {
@@ -278,6 +258,7 @@ public sealed class ContentTypeRepository<TEntity>(
         return result;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<IContentItemFieldsSource>> GetBySmartFolderIdAsync<T1, T2>(int smartFolderId,
         int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
@@ -305,6 +286,7 @@ public sealed class ContentTypeRepository<TEntity>(
         return result;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<IContentItemFieldsSource>> GetBySmartFolderIdAsync<T1, T2, T3>(int smartFolderId,
         int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
@@ -335,6 +317,7 @@ public sealed class ContentTypeRepository<TEntity>(
         return result;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<IContentItemFieldsSource>> GetBySmartFolderIdAsync<T1, T2, T3, T4>(
         int smartFolderId, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
@@ -397,6 +380,7 @@ public sealed class ContentTypeRepository<TEntity>(
         return result;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetByTagsAsync(string columnName, IEnumerable<Guid> tagIdentifiers,
         int maxLinkedItems = 0,
         CancellationToken cancellationToken = default)
