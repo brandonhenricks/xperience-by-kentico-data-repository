@@ -14,10 +14,21 @@ public sealed class MediaFileRepository : IMediaFileRepository
     private readonly IProgressiveCache cache;
     private readonly int cacheMinutes;
 
-    public MediaFileRepository(IProgressiveCache cache, RepositoryOptions options)
+    public MediaFileRepository(IProgressiveCache progressiveCache, RepositoryOptions options)
     {
-        this.cache = cache;
+        cache = progressiveCache ?? throw new ArgumentNullException(nameof(progressiveCache));
         cacheMinutes = options?.CacheMinutes ?? 10;
+    }
+
+    /// <inheritdoc />
+    public async Task<MediaLibraryInfo?> GetMediaLibraryByIdAsync(int mediaLibraryId,
+        CancellationToken cancellationToken = default)
+    {
+        var objectQuery = await new ObjectQuery<MediaLibraryInfo>()
+            .WhereEquals(nameof(MediaLibraryInfo.LibraryID), mediaLibraryId)
+            .GetEnumerableTypedResultAsync(cancellationToken: cancellationToken);
+
+        return objectQuery?.FirstOrDefault();
     }
 
     /// <inheritdoc />

@@ -94,14 +94,6 @@ public sealed class ContentTypeRepository<TEntity>(
                 config.When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems)))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var queryOptions = GetQueryExecutionOptions();
-
-        if (WebsiteChannelContext.IsPreview)
-        {
-            return await Executor.GetMappedResult<TEntity>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-        }
-
         var result = await ExecuteContentQuery<TEntity>(builder,
             () => CacheDependencyHelper.CreateContentItemTypeCacheDependency([contentType]),
             cancellationToken, CachePrefix, nameof(GetAllAsync), contentType, maxLinkedItems);
