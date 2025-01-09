@@ -12,6 +12,7 @@ public interface IContentRepository<TEntity> : IRepository<TEntity> where TEntit
     /// <param name="maxLinkedItems">The maximum number of linked items to retrieve.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty, or name is Empty.</exception>
     Task<TEntity?> GetByNameAsync(string name, string? languageName, int maxLinkedItems = 0, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -22,6 +23,7 @@ public interface IContentRepository<TEntity> : IRepository<TEntity> where TEntit
     /// <param name="maxLinkedItems">The maximum number of linked items to retrieve.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the entity.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty.</exception>
     Task<TEntity?> GetByIdentifierAsync(Guid id, string? languageName, int maxLinkedItems = 0, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -31,6 +33,7 @@ public interface IContentRepository<TEntity> : IRepository<TEntity> where TEntit
     /// <param name="maxLinkedItems">Maximum linked items to return.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty.</exception>
     Task<IEnumerable<TEntity>> GetBySmartFolderIdAsync(int smartFolderId, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
@@ -41,6 +44,7 @@ public interface IContentRepository<TEntity> : IRepository<TEntity> where TEntit
     /// <param name="maxLinkedItems">Maximum linked items to return.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty.</exception>
     Task<IEnumerable<IContentItemFieldsSource>> GetBySmartFolderIdAsync<T1, T2>(int smartFolderId, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
@@ -51,6 +55,7 @@ public interface IContentRepository<TEntity> : IRepository<TEntity> where TEntit
     /// <param name="maxLinkedItems">Maximum linked items to return.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty.</exception>
     Task<IEnumerable<IContentItemFieldsSource>> GetBySmartFolderIdAsync<T1, T2, T3>(int smartFolderId, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
@@ -61,6 +66,7 @@ public interface IContentRepository<TEntity> : IRepository<TEntity> where TEntit
     /// <param name="maxLinkedItems">Maximum linked items to return.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty.</exception>
     Task<IEnumerable<IContentItemFieldsSource>> GetBySmartFolderIdAsync<T1, T2, T3, T4>(int smartFolderId, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
@@ -72,6 +78,7 @@ public interface IContentRepository<TEntity> : IRepository<TEntity> where TEntit
     /// <param name="maxLinkedItems">Maximum linked items to return.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty.</exception>
     Task<IEnumerable<IContentItemFieldsSource>> GetBySmartFolderIdAsync<T1, T2, T3, T4, T5>(int smartFolderId, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
@@ -82,6 +89,7 @@ public interface IContentRepository<TEntity> : IRepository<TEntity> where TEntit
     /// <param name="maxLinkedItems">Maximum linked items to return.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty.</exception>
     Task<IEnumerable<TEntity>> GetBySmartFolderGuidAsync(Guid smartFolderId, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 

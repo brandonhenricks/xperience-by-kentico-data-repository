@@ -20,6 +20,7 @@ public sealed class MediaFileRepository : IMediaFileRepository
         cacheMinutes = options?.CacheMinutes ?? 10;
     }
 
+    /// <inheritdoc />
     public async Task<ImmutableList<MediaFileInfo>> GetAssetsFromRelatedItemsAsync(IEnumerable<AssetRelatedItem> items,
         CancellationToken cancellationToken = default)
     {
@@ -59,6 +60,7 @@ public sealed class MediaFileRepository : IMediaFileRepository
         );
     }
 
+    /// <inheritdoc />
     public async Task<ImmutableList<MediaFileInfo>> GetMediaFilesAsync(IEnumerable<Guid> mediaFileGuids,
             CancellationToken cancellationToken = default)
     {

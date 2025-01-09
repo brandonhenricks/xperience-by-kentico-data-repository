@@ -14,6 +14,7 @@ public interface IRepository<TEntity>
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if columnName is empty.</exception>
     Task<IEnumerable<TEntity>> GetByTagsAsync(string columnName, IEnumerable<Guid> tagIdentifiers, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
@@ -25,6 +26,7 @@ public interface IRepository<TEntity>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty.</exception>
     Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<Guid> nodeGuid, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
@@ -36,6 +38,7 @@ public interface IRepository<TEntity>
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty.</exception>
     Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<int> itemIds, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
@@ -46,6 +49,7 @@ public interface IRepository<TEntity>
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty.</exception>
     Task<IEnumerable<TEntity>> GetAllAsync(string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
@@ -57,6 +61,7 @@ public interface IRepository<TEntity>
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the entity.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty.</exception>
     Task<TEntity?> GetByIdAsync(int id, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
@@ -68,6 +73,7 @@ public interface IRepository<TEntity>
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the entity.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty.</exception>
     Task<TEntity?> GetByGuidAsync(Guid itemGuid, string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 
@@ -79,6 +85,7 @@ public interface IRepository<TEntity>
     /// <param name="maxLinkedItems">Maximum Linked Items to Return</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the collection of entities.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if content type is empty.</exception>
     Task<IEnumerable<TSchema>> GetAllBySchema<TSchema>(string? languageName, int maxLinkedItems = 0,
         CancellationToken cancellationToken = default);
 }
