@@ -9,6 +9,16 @@ namespace XperienceCommunity.DataRepository.Interfaces;
 /// </summary>
 public interface IMediaFileRepository
 {
+
+    /// <summary>
+    /// Retrieves a media library by its identifier.
+    /// </summary>
+    /// <param name="mediaLibraryId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns>A task that represent the asynchronous operation. The task result contains a <see cref="MediaLibraryInfo"/>.</returns>
+    Task<MediaLibraryInfo?> GetMediaLibraryByIdAsync(int mediaLibraryId,
+        CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Retrieves a list of media files based on the provided GUIDs.
     /// </summary>
