@@ -13,8 +13,8 @@ using XperienceCommunity.DataRepository.Models;
 namespace XperienceCommunity.DataRepository;
 
 public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IContentQueryExecutor executor,
-    IWebsiteChannelContext websiteChannelContext, RepositoryOptions options, ICacheDependencyBuilder builder) : BaseRepository(cache, executor,
-    websiteChannelContext, options, builder), IPageRepository<TEntity>
+    IWebsiteChannelContext websiteChannelContext, RepositoryOptions options, ICacheDependencyBuilder cacheDependencyBuilder) : BaseRepository(cache, executor,
+    websiteChannelContext, options, cacheDependencyBuilder), IPageRepository<TEntity>
     where TEntity : class, IWebPageFieldsSource
 {
     private readonly string? contentType = typeof(TEntity)?.GetContentTypeName() ?? string.Empty;
