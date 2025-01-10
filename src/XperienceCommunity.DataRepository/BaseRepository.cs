@@ -1,10 +1,9 @@
-﻿using System.Reflection;
-
-using CMS.ContentEngine;
+﻿using CMS.ContentEngine;
 using CMS.Helpers;
 using CMS.Websites;
 using CMS.Websites.Routing;
 
+using XperienceCommunity.DataRepository.Interfaces;
 using XperienceCommunity.DataRepository.Models;
 
 namespace XperienceCommunity.DataRepository;
@@ -35,6 +34,11 @@ public abstract class BaseRepository
     protected readonly IWebsiteChannelContext WebsiteChannelContext;
 
     /// <summary>
+    /// Gets the cache dependency builder instance.
+    /// </summary>
+    private readonly ICacheDependencyBuilder _cacheDependencyBuilder;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="BaseRepository"/> class.
     /// </summary>
     /// <param name="cache">The progressive cache instance.</param>
@@ -42,11 +46,13 @@ public abstract class BaseRepository
     /// <param name="websiteChannelContext">The website channel context instance.</param>
     /// <param name="options">The repository options.</param>
     protected BaseRepository(IProgressiveCache cache,
-        IContentQueryExecutor executor, IWebsiteChannelContext websiteChannelContext, RepositoryOptions options)
+        IContentQueryExecutor executor, IWebsiteChannelContext websiteChannelContext, RepositoryOptions options, ICacheDependencyBuilder cacheDependencyBuilder)
     {
         Cache = cache ?? throw new ArgumentNullException(nameof(cache));
         Executor = executor ?? throw new ArgumentNullException(nameof(executor));
         WebsiteChannelContext = websiteChannelContext ?? throw new ArgumentNullException(nameof(websiteChannelContext));
+        _cacheDependencyBuilder =
+            cacheDependencyBuilder ?? throw new ArgumentNullException(nameof(cacheDependencyBuilder));
         CacheMinutes = options?.CacheMinutes ?? 10;
     }
 
@@ -104,7 +110,7 @@ public abstract class BaseRepository
             }
             else
             {
-                var dependency = CreateCacheDependency(result);
+                var dependency = _cacheDependencyBuilder.Create(result);
 
                 if (dependency is not null)
                 {
@@ -160,7 +166,7 @@ public abstract class BaseRepository
             }
             else
             {
-                var dependency = CreateCacheDependency(result);
+                var dependency = _cacheDependencyBuilder.Create(result);
 
                 if (dependency is not null)
                 {
@@ -174,96 +180,6 @@ public abstract class BaseRepository
 
             return result;
         }, cacheSettings, cancellationToken);
-    }
-
-    protected static CMSCacheDependency? CreateCacheDependency<T>(IEnumerable<T> results)
-    {
-        var keys = ExtractCacheDependencyKeys(results);
-
-        if (keys.Count == 0)
-        {
-            return null;
-        }
-
-        return CreateCacheDependency(keys);
-    }
-
-    protected static CMSCacheDependency CreateCacheDependency(IEnumerable<string> cacheKeys) =>
-        new()
-        {
-            CacheKeys = cacheKeys?.ToArray() ?? []
-        };
-
-
-
-    private static void AddDependencyKeys(object value, HashSet<string> dependencyKeys)
-    {
-        switch (value)
-        {
-            case null:
-                return;
-            case ContentItemReference reference:
-                dependencyKeys.Add($"contentitem|byguid|{reference.Identifier}");
-                break;
-            case WebPageRelatedItem webPageReference:
-                dependencyKeys.Add($"webpageitem|byguid|{webPageReference.WebPageGuid}");
-                break;
-            case IWebPageFieldsSource webPageFieldSource:
-                dependencyKeys.Add($"webpageitem|byid|{webPageFieldSource.SystemFields.WebPageItemID}");
-                break;
-            case IContentItemFieldsSource contentItemFieldSource:
-                dependencyKeys.Add($"contentitem|byid|{contentItemFieldSource.SystemFields.ContentItemID}");
-                break;
-            case IEnumerable<IWebPageFieldsSource> webPageFieldSources:
-            {
-                foreach (var source in webPageFieldSources)
-                {
-                    dependencyKeys.Add($"webpageitem|byid|{source.SystemFields.WebPageItemID}");
-                }
-            }
-            break;
-            case IEnumerable<IContentItemFieldsSource> contentItemFieldSources:
-            {
-                foreach (var source in contentItemFieldSources)
-                {
-                    dependencyKeys.Add($"contentitem|byid|{source.SystemFields.ContentItemID}");
-                }
-            }
-            break;
-        }
-    }
-
-    private static IReadOnlyList<string> ExtractCacheDependencyKeys<T>(IEnumerable<T> items)
-    {
-        var dependencyKeys = new HashSet<string>();
-
-        foreach (var item in items)
-        {
-            if (item is null)
-            {
-                continue;
-            }
-
-            AddDependencyKeys(item, dependencyKeys);
-
-            var properties = item
-                .GetType()
-                .GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-            foreach (var property in properties)
-            {
-                object? value = property.GetValue(item);
-
-                if (value is null)
-                {
-                    continue;
-                }
-
-                AddDependencyKeys(value, dependencyKeys);
-            }
-        }
-
-        return dependencyKeys.ToList();
     }
 
     /// <summary>
