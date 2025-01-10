@@ -74,7 +74,7 @@ namespace XperienceCommunity.DataRepository.Tests.Builders
             // Assert
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Is.InstanceOf<CMSCacheDependency>());
-            Assert.That(1, Is.EqualTo(result.CacheKeys.Length));
+            Assert.That(2, Is.EqualTo(result.CacheKeys.Length));
         }
 
         public class MockContentItemFieldsSource : IContentItemFieldsSource
