@@ -5,7 +5,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<IsPackable>false</IsPackable>
-		<NoWarn>$(NoWarn);NU1504;NU1505;NU1506;NU1701;1591</NoWarn>
+		<NoWarn>$(NoWarn);NU1504;NU1505;NU1506;NU1701;1591;NUnit2007</NoWarn>
+		<IsTestProject>true</IsTestProject>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -27,6 +28,10 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\XperienceCommunity.DataRepository\XperienceCommunity.DataRepository.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Builder\" />
 	</ItemGroup>
 
 </Project>

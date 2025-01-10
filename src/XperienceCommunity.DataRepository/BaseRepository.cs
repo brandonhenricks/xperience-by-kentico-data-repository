@@ -36,7 +36,7 @@ public abstract class BaseRepository
     /// <summary>
     /// Gets the cache dependency builder instance.
     /// </summary>
-    private readonly ICacheDependencyBuilder _cacheDependencyBuilder;
+    protected readonly ICacheDependencyBuilder CacheDependencyBuilder;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseRepository"/> class.
@@ -45,13 +45,14 @@ public abstract class BaseRepository
     /// <param name="executor">The content query executor instance.</param>
     /// <param name="websiteChannelContext">The website channel context instance.</param>
     /// <param name="options">The repository options.</param>
+    /// <param name="cacheDependencyBuilder">The Cache Dependency Builder.</param>
     protected BaseRepository(IProgressiveCache cache,
         IContentQueryExecutor executor, IWebsiteChannelContext websiteChannelContext, RepositoryOptions options, ICacheDependencyBuilder cacheDependencyBuilder)
     {
         Cache = cache ?? throw new ArgumentNullException(nameof(cache));
         Executor = executor ?? throw new ArgumentNullException(nameof(executor));
         WebsiteChannelContext = websiteChannelContext ?? throw new ArgumentNullException(nameof(websiteChannelContext));
-        _cacheDependencyBuilder =
+        CacheDependencyBuilder =
             cacheDependencyBuilder ?? throw new ArgumentNullException(nameof(cacheDependencyBuilder));
         CacheMinutes = options?.CacheMinutes ?? 10;
     }
@@ -110,7 +111,7 @@ public abstract class BaseRepository
             }
             else
             {
-                var dependency = _cacheDependencyBuilder.Create(result);
+                var dependency = CacheDependencyBuilder.Create(result);
 
                 if (dependency is not null)
                 {
@@ -166,7 +167,7 @@ public abstract class BaseRepository
             }
             else
             {
-                var dependency = _cacheDependencyBuilder.Create(result);
+                var dependency = CacheDependencyBuilder.Create(result);
 
                 if (dependency is not null)
                 {
