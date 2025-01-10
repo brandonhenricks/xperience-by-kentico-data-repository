@@ -35,6 +35,8 @@ public static class DependencyInjection
 
         services.TryAddScoped<IMediaFileRepository, MediaFileRepository>();
 
+        services.TryAddScoped<ICacheDependencyBuilder, ICacheDependencyBuilder>();
+
         return services;
     }
 }

@@ -19,12 +19,13 @@ namespace XperienceCommunity.DataRepository.Builders
                 return null;
             }
 
-            return new CMSCacheDependency() { CacheKeys = keys.ToArray() };
+            return new CMSCacheDependency() { CacheKeys = [.. keys] };
         }
 
 
         private static void AddDependencyKeys(object value, HashSet<string> dependencyKeys)
         {
+
             switch (value)
             {
                 case null:
@@ -57,6 +58,8 @@ namespace XperienceCommunity.DataRepository.Builders
                     }
                 }
                 break;
+                default:
+                    break;
             }
         }
 
