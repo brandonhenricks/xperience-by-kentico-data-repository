@@ -10,6 +10,7 @@ namespace XperienceCommunity.DataRepository.Builders
 {
     public sealed class CacheDependencyBuilder : ICacheDependencyBuilder
     {
+        /// <inheritdoc />
         public CMSCacheDependency? Create<T>(IEnumerable<T> items)
         {
             var keys = ExtractCacheDependencyKeys(items);

@@ -121,36 +121,10 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
             .ForWebsite(WebsiteChannelContext.WebsiteChannelName))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var queryOptions = GetQueryExecutionOptions();
+        var result = await ExecuteContentQuery<TSchema>(builder, dependencyFunc,
+            cancellationToken, CachePrefix, nameof(GetAllBySchema), schemaName, languageName ?? string.Empty, maxLinkedItems);
 
-        if (WebsiteChannelContext.IsPreview)
-        {
-            var query = await Executor.GetMappedResult<TSchema>(builder, queryOptions,
-                cancellationToken: cancellationToken);
-
-            return query;
-        }
-
-        var cacheSettings =
-            new CacheSettings(CacheMinutes, "data", nameof(GetAllBySchema), schemaName, languageName, maxLinkedItems);
-
-        return await Cache.LoadAsync(async (cs, ct) =>
-        {
-            var result = (await Executor.GetMappedResult<TSchema>(builder, queryOptions,
-                cancellationToken: ct))?.ToList() ?? [];
-
-            cs.BoolCondition = result.Count > 0;
-
-            if (!cs.Cached)
-            {
-                return result;
-            }
-
-            cs.CacheDependency = CacheHelper.GetCacheDependency(
-                $"{schemaName}|all");
-
-            return result;
-        }, cacheSettings, cancellationToken);
+        return result;
     }
 
     /// <inheritdoc />

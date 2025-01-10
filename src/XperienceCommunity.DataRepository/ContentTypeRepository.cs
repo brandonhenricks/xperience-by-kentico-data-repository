@@ -325,6 +325,7 @@ public sealed class ContentTypeRepository<TEntity>(
         return result;
     }
 
+    /// <inheritdoc />
     public async Task<IEnumerable<IContentItemFieldsSource>> GetBySmartFolderIdAsync<T1, T2, T3, T4, T5>(
         int smartFolderId, int maxLinkedItems = 0, Func<CMSCacheDependency>? dependencyFunc = null,
         CancellationToken cancellationToken = default)
