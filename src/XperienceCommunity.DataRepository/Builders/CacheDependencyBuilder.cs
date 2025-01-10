@@ -24,9 +24,8 @@ namespace XperienceCommunity.DataRepository.Builders
         }
 
 
-        private static void AddDependencyKeys(object value, HashSet<string> dependencyKeys)
+        private static void AddDependencyKeys<T>(T value, HashSet<string> dependencyKeys)
         {
-
             switch (value)
             {
                 case null:
