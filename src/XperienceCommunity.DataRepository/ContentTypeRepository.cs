@@ -3,7 +3,6 @@ using CMS.Helpers;
 using CMS.Websites.Routing;
 
 using XperienceCommunity.DataRepository.Extensions;
-using XperienceCommunity.DataRepository.Helpers;
 using XperienceCommunity.DataRepository.Interfaces;
 using XperienceCommunity.DataRepository.Models;
 
@@ -47,8 +46,7 @@ public sealed class ContentTypeRepository<TEntity>(
             .Where(where => where.WhereIn(nameof(IContentItemFieldsSource.SystemFields.ContentItemGUID),
                 guidList))).When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecuteContentQuery<TEntity>(builder,
-            () => CacheDependencyHelper.CreateContentItemGUIDCacheDependency(guidList!),
+        var result = await ExecuteContentQuery<TEntity>(builder,null,
             cancellationToken, CachePrefix, nameof(GetAllAsync), guidList, maxLinkedItems);
 
         return result;
@@ -75,8 +73,7 @@ public sealed class ContentTypeRepository<TEntity>(
                 .Where(where => where.WhereIn(nameof(IContentItemFieldsSource.SystemFields.ContentItemID), idList)))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecuteContentQuery<TEntity>(builder,
-            () => CacheDependencyHelper.CreateContentItemIDCacheDependency(idList!),
+        var result = await ExecuteContentQuery<TEntity>(builder,null,
             cancellationToken, CachePrefix, nameof(GetAllAsync), idList, maxLinkedItems);
 
         return result;
@@ -94,8 +91,7 @@ public sealed class ContentTypeRepository<TEntity>(
                 config.When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems)))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecuteContentQuery<TEntity>(builder,
-            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency([contentType]),
+        var result = await ExecuteContentQuery<TEntity>(builder,null,
             cancellationToken, CachePrefix, nameof(GetAllAsync), contentType, maxLinkedItems);
 
         return result;
@@ -140,8 +136,7 @@ public sealed class ContentTypeRepository<TEntity>(
                 .TopN(1))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecuteContentQuery<TEntity>(builder,
-            () => CacheDependencyHelper.CreateContentItemGUIDCacheDependency([itemGuid]),
+        var result = await ExecuteContentQuery<TEntity>(builder,null,
             cancellationToken, CachePrefix, nameof(GetByIdAsync), itemGuid, maxLinkedItems);
 
         return result.FirstOrDefault();
@@ -161,8 +156,7 @@ public sealed class ContentTypeRepository<TEntity>(
                 .TopN(1))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecuteContentQuery<TEntity>(builder,
-            () => CacheDependencyHelper.CreateContentItemIDCacheDependency([id]),
+        var result = await ExecuteContentQuery<TEntity>(builder, null,
             cancellationToken, CachePrefix, nameof(GetByIdAsync), id, maxLinkedItems);
 
         return result.FirstOrDefault();
@@ -181,8 +175,7 @@ public sealed class ContentTypeRepository<TEntity>(
                 .TopN(1))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecuteContentQuery<TEntity>(builder,
-            () => CacheDependencyHelper.CreateContentItemGUIDCacheDependency([id]),
+        var result = await ExecuteContentQuery<TEntity>(builder, null,
             cancellationToken, CachePrefix, nameof(GetByIdentifierAsync), id, maxLinkedItems);
 
         return result.FirstOrDefault();
@@ -202,8 +195,7 @@ public sealed class ContentTypeRepository<TEntity>(
                     .TopN(1))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecuteContentQuery<TEntity>(builder,
-            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency([contentType]),
+        var result = await ExecuteContentQuery<TEntity>(builder, null,
             cancellationToken, CachePrefix, nameof(GetByNameAsync), name, maxLinkedItems);
 
         return result.FirstOrDefault();
@@ -222,8 +214,7 @@ public sealed class ContentTypeRepository<TEntity>(
             .OfContentType(contentType)
             .InSmartFolder(smartFolderId));
 
-        var result = await ExecuteContentQuery<TEntity>(builder,
-            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency([contentType]),
+        var result = await ExecuteContentQuery<TEntity>(builder, null,
             cancellationToken, CachePrefix, nameof(GetBySmartFolderGuidAsync), smartFolderId, maxLinkedItems);
 
         return result;
@@ -242,8 +233,7 @@ public sealed class ContentTypeRepository<TEntity>(
             .OfContentType(contentType)
             .InSmartFolder(smartFolderId));
 
-        var result = await ExecuteContentQuery<TEntity>(builder,
-            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency([contentType]!),
+        var result = await ExecuteContentQuery<TEntity>(builder, null,
             cancellationToken, CachePrefix, nameof(GetBySmartFolderIdAsync), contentType, smartFolderId,
             maxLinkedItems);
 
@@ -270,8 +260,7 @@ public sealed class ContentTypeRepository<TEntity>(
             .InSmartFolder(smartFolderId));
 
 
-        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder,
-            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency(contentTypes!),
+        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder, null,
             cancellationToken, CachePrefix, nameof(GetBySmartFolderIdAsync), contentTypes, smartFolderId,
             maxLinkedItems);
 
@@ -301,8 +290,7 @@ public sealed class ContentTypeRepository<TEntity>(
             .InSmartFolder(smartFolderId));
 
 
-        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder,
-            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency(contentTypes!),
+        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder, null,
             cancellationToken, CachePrefix, nameof(GetBySmartFolderIdAsync), contentTypes, smartFolderId,
             maxLinkedItems);
 
@@ -333,8 +321,7 @@ public sealed class ContentTypeRepository<TEntity>(
             .InSmartFolder(smartFolderId));
 
 
-        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder,
-            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency(contentTypes!),
+        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder, null,
             cancellationToken, CachePrefix, nameof(GetBySmartFolderIdAsync), contentTypes, smartFolderId,
             maxLinkedItems);
 
@@ -364,8 +351,7 @@ public sealed class ContentTypeRepository<TEntity>(
             .InSmartFolder(smartFolderId));
 
 
-        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder,
-            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency(contentTypes!),
+        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder, null,
             cancellationToken, CachePrefix, nameof(GetBySmartFolderIdAsync), contentTypes, smartFolderId,
             maxLinkedItems);
 
@@ -395,8 +381,7 @@ public sealed class ContentTypeRepository<TEntity>(
                     linkOptions => linkOptions.IncludeWebPageData()))
                 .Where(where => where.WhereContainsTags(columnName, tagIdents)));
 
-        var result = await ExecuteContentQuery<TEntity>(builder,
-            () => CacheDependencyHelper.CreateContentItemTypeCacheDependency([contentType]),
+        var result = await ExecuteContentQuery<TEntity>(builder, null,
             cancellationToken, CachePrefix, nameof(GetByTagsAsync), contentType, columnName,
             maxLinkedItems);
 

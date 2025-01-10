@@ -1,4 +1,6 @@
-﻿using CMS.ContentEngine;
+﻿using System.Reflection;
+
+using CMS.ContentEngine;
 using CMS.Helpers;
 using CMS.Websites;
 using CMS.Websites.Routing;
@@ -70,7 +72,7 @@ public abstract class BaseRepository
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <param name="cacheNameParts">The parts of the cache name.</param>
     /// <returns>The result of the query.</returns>
-    protected async Task<IEnumerable<T>> ExecutePageQuery<T>(ContentItemQueryBuilder builder, Func<CMSCacheDependency> dependencyFunc, CancellationToken cancellationToken = default,
+    protected async Task<IEnumerable<T>> ExecutePageQuery<T>(ContentItemQueryBuilder builder, Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default,
         params object[] cacheNameParts)
     {
         var queryOptions = GetQueryExecutionOptions();
@@ -95,7 +97,24 @@ public abstract class BaseRepository
                 return result;
             }
 
-            cs.CacheDependency = dependencyFunc.Invoke();
+
+            if (dependencyFunc is not null)
+            {
+                cs.CacheDependency = dependencyFunc.Invoke();
+            }
+            else
+            {
+                var dependency = CreateCacheDependency(result);
+
+                if (dependency is not null)
+                {
+                    cs.CacheDependency = dependency;
+                }
+                else
+                {
+                    cs.BoolCondition = false;
+                }
+            }
 
             return result;
         }, cacheSettings, cancellationToken);
@@ -110,7 +129,7 @@ public abstract class BaseRepository
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <param name="cacheNameParts">The parts of the cache name.</param>
     /// <returns>The result of the query.</returns>
-    protected async Task<IEnumerable<T>> ExecuteContentQuery<T>(ContentItemQueryBuilder builder, Func<CMSCacheDependency> dependencyFunc, CancellationToken cancellationToken = default,
+    protected async Task<IEnumerable<T>> ExecuteContentQuery<T>(ContentItemQueryBuilder builder, Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default,
         params object[] cacheNameParts)
     {
         var queryOptions = GetQueryExecutionOptions();
@@ -135,10 +154,116 @@ public abstract class BaseRepository
                 return result;
             }
 
-            cs.CacheDependency = dependencyFunc.Invoke();
+            if (dependencyFunc is not null)
+            {
+                cs.CacheDependency = dependencyFunc.Invoke();
+            }
+            else
+            {
+                var dependency = CreateCacheDependency(result);
+
+                if (dependency is not null)
+                {
+                    cs.CacheDependency = dependency;
+                }
+                else
+                {
+                    cs.BoolCondition = false;
+                }
+            }
 
             return result;
         }, cacheSettings, cancellationToken);
+    }
+
+    protected static CMSCacheDependency? CreateCacheDependency<T>(IEnumerable<T> results)
+    {
+        var keys = ExtractCacheDependencyKeys(results);
+
+        if (keys.Count == 0)
+        {
+            return null;
+        }
+
+        return CreateCacheDependency(keys);
+    }
+
+    protected static CMSCacheDependency CreateCacheDependency(IEnumerable<string> cacheKeys) =>
+        new()
+        {
+            CacheKeys = cacheKeys?.ToArray() ?? []
+        };
+
+
+
+    private static void AddDependencyKeys(object value, HashSet<string> dependencyKeys)
+    {
+        switch (value)
+        {
+            case null:
+                return;
+            case ContentItemReference reference:
+                dependencyKeys.Add($"contentitem|byguid|{reference.Identifier}");
+                break;
+            case WebPageRelatedItem webPageReference:
+                dependencyKeys.Add($"webpageitem|byguid|{webPageReference.WebPageGuid}");
+                break;
+            case IWebPageFieldsSource webPageFieldSource:
+                dependencyKeys.Add($"webpageitem|byid|{webPageFieldSource.SystemFields.WebPageItemID}");
+                break;
+            case IContentItemFieldsSource contentItemFieldSource:
+                dependencyKeys.Add($"contentitem|byid|{contentItemFieldSource.SystemFields.ContentItemID}");
+                break;
+            case IEnumerable<IWebPageFieldsSource> webPageFieldSources:
+            {
+                foreach (var source in webPageFieldSources)
+                {
+                    dependencyKeys.Add($"webpageitem|byid|{source.SystemFields.WebPageItemID}");
+                }
+            }
+            break;
+            case IEnumerable<IContentItemFieldsSource> contentItemFieldSources:
+            {
+                foreach (var source in contentItemFieldSources)
+                {
+                    dependencyKeys.Add($"contentitem|byid|{source.SystemFields.ContentItemID}");
+                }
+            }
+            break;
+        }
+    }
+
+    private static IReadOnlyList<string> ExtractCacheDependencyKeys<T>(IEnumerable<T> items)
+    {
+        var dependencyKeys = new HashSet<string>();
+
+        foreach (var item in items)
+        {
+            if (item is null)
+            {
+                continue;
+            }
+
+            AddDependencyKeys(item, dependencyKeys);
+
+            var properties = item
+                .GetType()
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (var property in properties)
+            {
+                object? value = property.GetValue(item);
+
+                if (value is null)
+                {
+                    continue;
+                }
+
+                AddDependencyKeys(value, dependencyKeys);
+            }
+        }
+
+        return dependencyKeys.ToList();
     }
 
     /// <summary>
