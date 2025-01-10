@@ -23,7 +23,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
     /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetAllAsync(string? languageName, int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
 
@@ -37,7 +37,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecutePageQuery<TEntity>(builder, () => CacheDependencyHelper.CreateWebPageItemTypeCacheDependency([contentType], WebsiteChannelContext.WebsiteChannelName),
+        var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetAllAsync), languageName ?? string.Empty, contentType, maxLinkedItems);
 
         return result;
@@ -45,8 +45,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
     /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<Guid> nodeGuid, string? languageName,
-        int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        int maxLinkedItems = 0, Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
 
@@ -69,7 +68,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
                                 guidList)))
             .When(!string.IsNullOrEmpty(languageName), options => options.InLanguage(languageName));
 
-        var result = await ExecutePageQuery<TEntity>(builder, () => CacheDependencyHelper.CreateWebPageItemGUIDCacheDependency(guidList),
+        var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetAllAsync), guidList, languageName ?? string.Empty, contentType, maxLinkedItems);
 
         return result;
@@ -77,7 +76,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
     /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<int> itemIds, string? languageName,
-        int maxLinkedItems = 0, CancellationToken cancellationToken = default)
+        int maxLinkedItems = 0, Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
 
@@ -99,7 +98,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
                             where.WhereIn(nameof(IWebPageFieldsSource.SystemFields.WebPageItemID), itemIdList)))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecutePageQuery<TEntity>(builder, () => CacheDependencyHelper.CreateWebPageItemIDCacheDependency(itemIdList),
+        var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetAllAsync), itemIdList, languageName ?? string.Empty, contentType, maxLinkedItems);
 
         return result;
@@ -107,7 +106,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
     /// <inheritdoc />
     public async Task<IEnumerable<TSchema>> GetAllBySchema<TSchema>(string? languageName, int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         string? schemaName = typeof(TSchema).GetReusableFieldSchemaName();
 
@@ -156,7 +155,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
     /// <inheritdoc />
     public async Task<TEntity?> GetByGuidAsync(Guid itemGuid, string? languageName, int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
 
@@ -174,7 +173,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
                         .TopN(1))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecutePageQuery<TEntity>(builder, () => CacheDependencyHelper.CreateWebPageItemGUIDCacheDependency([itemGuid]),
+        var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByGuidAsync), itemGuid, contentType, maxLinkedItems);
 
         return result.FirstOrDefault();
@@ -182,7 +181,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
     /// <inheritdoc />
     public async Task<TEntity?> GetByIdAsync(int id, string? languageName, int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
 
@@ -199,7 +198,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
                         .TopN(1))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecutePageQuery<TEntity>(builder, () => CacheDependencyHelper.CreateWebPageItemIDCacheDependency([id]),
+        var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByIdAsync), id, contentType, maxLinkedItems);
 
         return result.FirstOrDefault();
@@ -207,7 +206,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
     /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetByPathAsync(string path, string? languageName, int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
 
@@ -221,7 +220,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName, PathMatch.Single(path)))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecutePageQuery<TEntity>(builder, () => CacheDependencyHelper.CreateWebPageItemTypeCacheDependency([contentType], WebsiteChannelContext.WebsiteChannelName),
+        var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc ?? (() => CacheDependencyHelper.CreateWebPageItemTypeCacheDependency([contentType], WebsiteChannelContext.WebsiteChannelName)),
             cancellationToken, CachePrefix, nameof(GetByPathAsync), path, contentType, maxLinkedItems);
 
         return result;
@@ -229,8 +228,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
     /// <inheritdoc />
     public async Task<IEnumerable<IWebPageFieldsSource>> GetByPathAsync<T1, T2>(string path, string? languageName,
-        int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        int maxLinkedItems = 0, Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         string?[] contentTypes =
         [
@@ -252,7 +250,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName, PathMatch.Single(path)))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecutePageQuery<IWebPageFieldsSource>(builder, () => CacheDependencyHelper.CreateWebPageItemTypeCacheDependency(contentTypes!, WebsiteChannelContext.WebsiteChannelName),
+        var result = await ExecutePageQuery<IWebPageFieldsSource>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByPathAsync), path, contentTypes, maxLinkedItems);
 
         return result;
@@ -260,8 +258,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
     /// <inheritdoc />
     public async Task<IEnumerable<IWebPageFieldsSource>> GetByPathAsync<T1, T2, T3>(string path, string? languageName,
-        int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        int maxLinkedItems = 0, Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         string?[] contentTypes =
         [
@@ -283,7 +280,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName, PathMatch.Single(path)))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecutePageQuery<IWebPageFieldsSource>(builder, () => CacheDependencyHelper.CreateWebPageItemTypeCacheDependency(contentTypes!, WebsiteChannelContext.WebsiteChannelName),
+        var result = await ExecutePageQuery<IWebPageFieldsSource>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByPathAsync), path, contentTypes, maxLinkedItems);
 
         return result;
@@ -291,8 +288,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
     /// <inheritdoc />
     public async Task<IEnumerable<IWebPageFieldsSource>> GetByPathAsync<T1, T2, T3, T4>(string path,
-        string? languageName, int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        string? languageName, int maxLinkedItems = 0, Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         string?[] contentTypes =
         [
@@ -315,7 +311,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName, PathMatch.Single(path)))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecutePageQuery<IWebPageFieldsSource>(builder, () => CacheDependencyHelper.CreateWebPageItemTypeCacheDependency(contentTypes!, WebsiteChannelContext.WebsiteChannelName),
+        var result = await ExecutePageQuery<IWebPageFieldsSource>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByPathAsync), path, contentTypes, maxLinkedItems);
 
         return result;
@@ -323,8 +319,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
     /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetByTagsAsync(string columnName, IEnumerable<Guid> tagIdentifiers,
-                                                int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+                                                int maxLinkedItems = 0, Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(columnName);
         ArgumentException.ThrowIfNullOrEmpty(contentType);
@@ -347,7 +342,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
                         .Where(where => where.WhereContainsTags(columnName,
                                 guidList)));
 
-        var result = await ExecutePageQuery<TEntity>(builder, () => CacheDependencyHelper.CreateWebPageItemGUIDCacheDependency(guidList!),
+        var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByTagsAsync), columnName, guidList, maxLinkedItems);
 
         return result;

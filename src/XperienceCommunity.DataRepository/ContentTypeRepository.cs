@@ -22,12 +22,11 @@ public sealed class ContentTypeRepository<TEntity>(
 {
     private readonly string contentType = typeof(TEntity)?.GetContentTypeName() ?? string.Empty;
 
-
     public override string CachePrefix => $"data|{contentType}|{WebsiteChannelContext.WebsiteChannelName}";
 
     /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<Guid> nodeGuid, string? languageName,
-        int maxLinkedItems = 0,
+        int maxLinkedItems = 0, Func<CMSCacheDependency>? dependencyFunc = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
@@ -46,7 +45,7 @@ public sealed class ContentTypeRepository<TEntity>(
             .Where(where => where.WhereIn(nameof(IContentItemFieldsSource.SystemFields.ContentItemGUID),
                 guidList))).When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecuteContentQuery<TEntity>(builder,null,
+        var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetAllAsync), guidList, maxLinkedItems);
 
         return result;
@@ -54,7 +53,7 @@ public sealed class ContentTypeRepository<TEntity>(
 
     /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetAllAsync(IEnumerable<int> itemIds, string? languageName,
-        int maxLinkedItems = 0,
+        int maxLinkedItems = 0, Func<CMSCacheDependency>? dependencyFunc = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
@@ -73,7 +72,7 @@ public sealed class ContentTypeRepository<TEntity>(
                 .Where(where => where.WhereIn(nameof(IContentItemFieldsSource.SystemFields.ContentItemID), idList)))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecuteContentQuery<TEntity>(builder,null,
+        var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetAllAsync), idList, maxLinkedItems);
 
         return result;
@@ -81,7 +80,7 @@ public sealed class ContentTypeRepository<TEntity>(
 
     /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetAllAsync(string? languageName, int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
 
@@ -91,7 +90,7 @@ public sealed class ContentTypeRepository<TEntity>(
                 config.When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems)))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecuteContentQuery<TEntity>(builder,null,
+        var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetAllAsync), contentType, maxLinkedItems);
 
         return result;
@@ -99,7 +98,7 @@ public sealed class ContentTypeRepository<TEntity>(
 
     /// <inheritdoc />
     public async Task<IEnumerable<TSchema>> GetAllBySchema<TSchema>(string? languageName, int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         string? schemaName = typeof(TSchema).GetReusableFieldSchemaName();
 
@@ -123,7 +122,7 @@ public sealed class ContentTypeRepository<TEntity>(
 
     /// <inheritdoc />
     public async Task<TEntity?> GetByGuidAsync(Guid itemGuid, string? languageName, int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
 
@@ -136,7 +135,7 @@ public sealed class ContentTypeRepository<TEntity>(
                 .TopN(1))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecuteContentQuery<TEntity>(builder,null,
+        var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByIdAsync), itemGuid, maxLinkedItems);
 
         return result.FirstOrDefault();
@@ -144,7 +143,7 @@ public sealed class ContentTypeRepository<TEntity>(
 
     /// <inheritdoc />
     public async Task<TEntity?> GetByIdAsync(int id, string? languageName, int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
         var builder = new ContentItemQueryBuilder();
@@ -156,7 +155,7 @@ public sealed class ContentTypeRepository<TEntity>(
                 .TopN(1))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecuteContentQuery<TEntity>(builder, null,
+        var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByIdAsync), id, maxLinkedItems);
 
         return result.FirstOrDefault();
@@ -164,7 +163,7 @@ public sealed class ContentTypeRepository<TEntity>(
 
     /// <inheritdoc />
     public async Task<TEntity?> GetByIdentifierAsync(Guid id, string? languageName, int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         var builder = new ContentItemQueryBuilder();
 
@@ -175,7 +174,7 @@ public sealed class ContentTypeRepository<TEntity>(
                 .TopN(1))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecuteContentQuery<TEntity>(builder, null,
+        var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByIdentifierAsync), id, maxLinkedItems);
 
         return result.FirstOrDefault();
@@ -183,7 +182,7 @@ public sealed class ContentTypeRepository<TEntity>(
 
     /// <inheritdoc />
     public async Task<TEntity?> GetByNameAsync(string name, string? languageName, int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         var builder = new ContentItemQueryBuilder();
 
@@ -195,7 +194,7 @@ public sealed class ContentTypeRepository<TEntity>(
                     .TopN(1))
             .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
 
-        var result = await ExecuteContentQuery<TEntity>(builder, null,
+        var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByNameAsync), name, maxLinkedItems);
 
         return result.FirstOrDefault();
@@ -203,7 +202,7 @@ public sealed class ContentTypeRepository<TEntity>(
 
     /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetBySmartFolderGuidAsync(Guid smartFolderId, int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
 
@@ -214,7 +213,7 @@ public sealed class ContentTypeRepository<TEntity>(
             .OfContentType(contentType)
             .InSmartFolder(smartFolderId));
 
-        var result = await ExecuteContentQuery<TEntity>(builder, null,
+        var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetBySmartFolderGuidAsync), smartFolderId, maxLinkedItems);
 
         return result;
@@ -222,7 +221,7 @@ public sealed class ContentTypeRepository<TEntity>(
 
     /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetBySmartFolderIdAsync(int smartFolderId, int maxLinkedItems = 0,
-        CancellationToken cancellationToken = default)
+        Func<CMSCacheDependency>? dependencyFunc = null, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
 
@@ -233,7 +232,7 @@ public sealed class ContentTypeRepository<TEntity>(
             .OfContentType(contentType)
             .InSmartFolder(smartFolderId));
 
-        var result = await ExecuteContentQuery<TEntity>(builder, null,
+        var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetBySmartFolderIdAsync), contentType, smartFolderId,
             maxLinkedItems);
 
@@ -242,7 +241,7 @@ public sealed class ContentTypeRepository<TEntity>(
 
     /// <inheritdoc />
     public async Task<IEnumerable<IContentItemFieldsSource>> GetBySmartFolderIdAsync<T1, T2>(int smartFolderId,
-        int maxLinkedItems = 0,
+        int maxLinkedItems = 0, Func<CMSCacheDependency>? dependencyFunc = null,
         CancellationToken cancellationToken = default)
     {
         string?[] contentTypes = [typeof(T1).GetContentTypeName(), typeof(T2).GetContentTypeName()];
@@ -259,8 +258,7 @@ public sealed class ContentTypeRepository<TEntity>(
             .OfContentType(contentTypes)
             .InSmartFolder(smartFolderId));
 
-
-        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder, null,
+        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetBySmartFolderIdAsync), contentTypes, smartFolderId,
             maxLinkedItems);
 
@@ -269,7 +267,7 @@ public sealed class ContentTypeRepository<TEntity>(
 
     /// <inheritdoc />
     public async Task<IEnumerable<IContentItemFieldsSource>> GetBySmartFolderIdAsync<T1, T2, T3>(int smartFolderId,
-        int maxLinkedItems = 0,
+        int maxLinkedItems = 0, Func<CMSCacheDependency>? dependencyFunc = null,
         CancellationToken cancellationToken = default)
     {
         string?[] contentTypes =
@@ -289,8 +287,7 @@ public sealed class ContentTypeRepository<TEntity>(
             .OfContentType(contentTypes)
             .InSmartFolder(smartFolderId));
 
-
-        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder, null,
+        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetBySmartFolderIdAsync), contentTypes, smartFolderId,
             maxLinkedItems);
 
@@ -299,7 +296,7 @@ public sealed class ContentTypeRepository<TEntity>(
 
     /// <inheritdoc />
     public async Task<IEnumerable<IContentItemFieldsSource>> GetBySmartFolderIdAsync<T1, T2, T3, T4>(
-        int smartFolderId, int maxLinkedItems = 0,
+        int smartFolderId, int maxLinkedItems = 0, Func<CMSCacheDependency>? dependencyFunc = null,
         CancellationToken cancellationToken = default)
     {
         string?[] contentTypes =
@@ -320,8 +317,7 @@ public sealed class ContentTypeRepository<TEntity>(
             .OfContentType(contentTypes)
             .InSmartFolder(smartFolderId));
 
-
-        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder, null,
+        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetBySmartFolderIdAsync), contentTypes, smartFolderId,
             maxLinkedItems);
 
@@ -329,7 +325,7 @@ public sealed class ContentTypeRepository<TEntity>(
     }
 
     public async Task<IEnumerable<IContentItemFieldsSource>> GetBySmartFolderIdAsync<T1, T2, T3, T4, T5>(
-        int smartFolderId, int maxLinkedItems = 0,
+        int smartFolderId, int maxLinkedItems = 0, Func<CMSCacheDependency>? dependencyFunc = null,
         CancellationToken cancellationToken = default)
     {
         string?[] contentTypes =
@@ -350,8 +346,7 @@ public sealed class ContentTypeRepository<TEntity>(
             .OfContentType(contentTypes)
             .InSmartFolder(smartFolderId));
 
-
-        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder, null,
+        var result = await ExecuteContentQuery<IContentItemFieldsSource>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetBySmartFolderIdAsync), contentTypes, smartFolderId,
             maxLinkedItems);
 
@@ -360,7 +355,7 @@ public sealed class ContentTypeRepository<TEntity>(
 
     /// <inheritdoc />
     public async Task<IEnumerable<TEntity>> GetByTagsAsync(string columnName, IEnumerable<Guid> tagIdentifiers,
-        int maxLinkedItems = 0,
+        int maxLinkedItems = 0, Func<CMSCacheDependency>? dependencyFunc = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(contentType);
@@ -381,7 +376,7 @@ public sealed class ContentTypeRepository<TEntity>(
                     linkOptions => linkOptions.IncludeWebPageData()))
                 .Where(where => where.WhereContainsTags(columnName, tagIdents)));
 
-        var result = await ExecuteContentQuery<TEntity>(builder, null,
+        var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByTagsAsync), contentType, columnName,
             maxLinkedItems);
 
