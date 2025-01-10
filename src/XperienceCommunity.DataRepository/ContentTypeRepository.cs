@@ -16,9 +16,9 @@ public sealed class ContentTypeRepository<TEntity>(
     IContentQueryExecutor executor,
     IWebsiteChannelContext websiteChannelContext,
     RepositoryOptions options,
-    ICacheDependencyBuilder builder)
+    ICacheDependencyBuilder cacheDependencyBuilder)
     : BaseRepository(cache, executor,
-        websiteChannelContext, options, builder), IContentRepository<TEntity>
+        websiteChannelContext, options, cacheDependencyBuilder), IContentRepository<TEntity>
     where TEntity : class, IContentItemFieldsSource
 {
     private readonly string contentType = typeof(TEntity)?.GetContentTypeName() ?? string.Empty;
