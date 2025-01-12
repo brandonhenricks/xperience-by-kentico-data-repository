@@ -39,4 +39,17 @@ public static class ContentItemQueryBuilderExtensions
 
         return source;
     }
+
+    /// <summary>
+    /// Configures the <see cref="ContentItemQueryBuilder"/> to filter by the specified language.
+    /// </summary>
+    /// <param name="source">The <see cref="ContentItemQueryBuilder"/> to apply the action to.</param>
+    /// <param name="language">The language name.</param>
+    /// <returns>The original <see cref="ContentItemQueryBuilder"/> with the action applied.</returns>
+    public static ContentItemQueryBuilder WithLanguage(this ContentItemQueryBuilder source, string? language)
+    {
+        source.When(!string.IsNullOrEmpty(language), q => q.InLanguage(language));
+
+        return source;
+    }
 }

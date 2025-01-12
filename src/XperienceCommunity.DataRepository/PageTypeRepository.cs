@@ -1,5 +1,4 @@
 ﻿using CMS.ContentEngine;
-using CMS.DataEngine;
 using CMS.Helpers;
 using CMS.Websites;
 using CMS.Websites.Routing;
@@ -31,11 +30,10 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
             .ForContentType<TEntity>(
                 config =>
                     config
-                        .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                            linkOptions => linkOptions.IncludeWebPageData()))
-                        .OrderBy(OrderByColumn.Asc(nameof(IWebPageFieldsSource.SystemFields.WebPageItemOrder)))
+                        .WithLinkedItemsAndWebPageData(maxLinkedItems)
+                        .OrderByWebPageItemOrder()
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName))
-            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+            .WithLanguage(languageName);
 
         var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetAllAsync), languageName ?? string.Empty, contentType, maxLinkedItems);
@@ -60,13 +58,12 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
             .ForContentType<TEntity>(
                 config =>
                     config
-                        .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                            linkOptions => linkOptions.IncludeWebPageData()))
-                        .OrderBy(OrderByColumn.Asc(nameof(IWebPageFieldsSource.SystemFields.WebPageItemOrder)))
+                        .WithLinkedItemsAndWebPageData(maxLinkedItems)
+                        .OrderByWebPageItemOrder()
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName)
                         .Where(where => where.WhereIn(nameof(IWebPageContentQueryDataContainer.WebPageItemGUID),
                                 guidList)))
-            .When(!string.IsNullOrEmpty(languageName), options => options.InLanguage(languageName));
+            .WithLanguage(languageName);
 
         var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetAllAsync), guidList, languageName ?? string.Empty, contentType, maxLinkedItems);
@@ -91,12 +88,11 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
             .ForContentType<TEntity>(
                 config =>
                     config
-                        .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                            linkOptions => linkOptions.IncludeWebPageData()))
-                        .OrderBy(OrderByColumn.Asc(nameof(IWebPageFieldsSource.SystemFields.WebPageItemOrder)))
+                        .WithLinkedItemsAndWebPageData(maxLinkedItems)
+                        .OrderByWebPageItemOrder()
                         .Where(where =>
                             where.WhereIn(nameof(IWebPageFieldsSource.SystemFields.WebPageItemID), itemIdList)))
-            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+            .WithLanguage(languageName);
 
         var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetAllAsync), itemIdList, languageName ?? string.Empty, contentType, maxLinkedItems);
@@ -115,11 +111,11 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(parameters => parameters
-            .When(maxLinkedItems > 0, linkItemOptions => linkItemOptions.WithLinkedItems(maxLinkedItems))
+                .WithLinkedItemsAndWebPageData(maxLinkedItems)
             .OfReusableSchema(schemaName)
             .WithWebPageData()
             .ForWebsite(WebsiteChannelContext.WebsiteChannelName))
-            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+            .WithLanguage(languageName);
 
         var result = await ExecuteContentQuery<TSchema>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetAllBySchema), schemaName, languageName ?? string.Empty, maxLinkedItems);
@@ -137,15 +133,14 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
             .ForContentType(contentType,
                 config =>
                     config
-                        .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                            linkOptions => linkOptions.IncludeWebPageData()))
-                        .OrderBy(OrderByColumn.Asc(nameof(IWebPageFieldsSource.SystemFields.WebPageItemOrder)))
+                        .WithLinkedItemsAndWebPageData(maxLinkedItems)
+                        .OrderByWebPageItemOrder()
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName)
                         .Where(predicate =>
                             predicate.WhereEquals(nameof(IWebPageFieldsSource.SystemFields.WebPageItemGUID),
                                 itemGuid))
                         .TopN(1))
-            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+            .WithLanguage(languageName);
 
         var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByGuidAsync), itemGuid, contentType, maxLinkedItems);
@@ -163,14 +158,13 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
             .ForContentType(contentType,
                 config =>
                     config
-                        .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                            linkOptions => linkOptions.IncludeWebPageData()))
-                        .OrderBy(OrderByColumn.Asc(nameof(IWebPageFieldsSource.SystemFields.WebPageItemOrder)))
+                        .WithLinkedItemsAndWebPageData(maxLinkedItems)
+                        .OrderByWebPageItemOrder()
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName)
                         .Where(predicate =>
                             predicate.WhereEquals(nameof(IWebPageFieldsSource.SystemFields.WebPageItemID), id))
                         .TopN(1))
-            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+            .WithLanguage(languageName);
 
         var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByIdAsync), id, contentType, maxLinkedItems);
@@ -188,11 +182,10 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
             .ForContentType(contentType,
                 config =>
                     config
-                        .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                            linkOptions => linkOptions.IncludeWebPageData()))
-                        .OrderBy(OrderByColumn.Asc(nameof(IWebPageFieldsSource.SystemFields.WebPageItemOrder)))
+                        .WithLinkedItemsAndWebPageData(maxLinkedItems)
+                        .OrderByWebPageItemOrder()
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName, PathMatch.Single(path)))
-            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+            .WithLanguage(languageName);
 
         var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc ?? (() => CacheDependencyHelper.CreateWebPageItemTypeCacheDependency([contentType], WebsiteChannelContext.WebsiteChannelName)),
             cancellationToken, CachePrefix, nameof(GetByPathAsync), path, contentType, maxLinkedItems);
@@ -218,11 +211,10 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
             .ForContentTypes(
                 config =>
                     config
-                        .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                            linkOptions => linkOptions.IncludeWebPageData()))
+                        .WithLinkedItemsAndWebPageData(maxLinkedItems)
                         .OfContentType(contentTypes)
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName, PathMatch.Single(path)))
-            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+            .WithLanguage(languageName);
 
         var result = await ExecutePageQuery<IWebPageFieldsSource>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByPathAsync), path, contentTypes, maxLinkedItems);
@@ -249,10 +241,9 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
                 config =>
                     config
                         .OfContentType(contentTypes)
-                        .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                            linkOptions => linkOptions.IncludeWebPageData()))
+                        .WithLinkedItemsAndWebPageData(maxLinkedItems)
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName, PathMatch.Single(path)))
-            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+            .WithLanguage(languageName);
 
         var result = await ExecutePageQuery<IWebPageFieldsSource>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByPathAsync), path, contentTypes, maxLinkedItems);
@@ -280,10 +271,9 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
                 config =>
                     config
                         .OfContentType(contentTypes)
-                        .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                            linkOptions => linkOptions.IncludeWebPageData()))
+                        .WithLinkedItemsAndWebPageData(maxLinkedItems)
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName, PathMatch.Single(path)))
-            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+            .WithLanguage(languageName);
 
         var result = await ExecutePageQuery<IWebPageFieldsSource>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByPathAsync), path, contentTypes, maxLinkedItems);
@@ -306,12 +296,10 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         }
 
         var builder = new ContentItemQueryBuilder()
-            .ForContentType(contentType,
-                config =>
+            .ForContentType<TEntity>(config =>
                     config
-                        .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                            linkOptions => linkOptions.IncludeWebPageData()))
-                        .OrderBy(OrderByColumn.Asc(nameof(IWebPageFieldsSource.SystemFields.WebPageItemOrder)))
+                        .WithLinkedItemsAndWebPageData(maxLinkedItems)
+                        .OrderByWebPageItemOrder()
                         .ForWebsite(WebsiteChannelContext.WebsiteChannelName)
                         .Where(where => where.WhereContainsTags(columnName,
                                 guidList)));
