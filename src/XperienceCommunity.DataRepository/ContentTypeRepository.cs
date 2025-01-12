@@ -42,9 +42,10 @@ public sealed class ContentTypeRepository<TEntity>(
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentType<TEntity>(config => config
-            .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
-            .Where(where => where.WhereIn(nameof(IContentItemFieldsSource.SystemFields.ContentItemGUID),
-                guidList))).When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+                .WithLinkedItemsAndWebPageData(maxLinkedItems)
+                .Where(where => where.WhereIn(nameof(IContentItemFieldsSource.SystemFields.ContentItemGUID),
+                    guidList)))
+            .WithLanguage(languageName);
 
         var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetAllAsync), guidList, maxLinkedItems);
@@ -69,9 +70,9 @@ public sealed class ContentTypeRepository<TEntity>(
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentType<TEntity>(config => config
-                .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+                .WithLinkedItemsAndWebPageData(maxLinkedItems)
                 .Where(where => where.WhereIn(nameof(IContentItemFieldsSource.SystemFields.ContentItemID), idList)))
-            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+            .WithLanguage(languageName);
 
         var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetAllAsync), idList, maxLinkedItems);
@@ -88,8 +89,9 @@ public sealed class ContentTypeRepository<TEntity>(
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentType<TEntity>(config =>
-                config.When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems)))
-            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+                config
+                    .WithLinkedItemsAndWebPageData(maxLinkedItems))
+            .WithLanguage(languageName);
 
         var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetAllAsync), contentType, maxLinkedItems);
@@ -108,11 +110,10 @@ public sealed class ContentTypeRepository<TEntity>(
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(parameters => parameters
-                .When(maxLinkedItems > 0, linkItemOptions => linkItemOptions.WithLinkedItems(maxLinkedItems))
+                .WithLinkedItemsAndWebPageData(maxLinkedItems)
                 .OfReusableSchema(schemaName)
                 .WithContentTypeFields())
-            .When(!string.IsNullOrEmpty(languageName),
-                lang => lang.InLanguage(languageName));
+            .WithLanguage(languageName);
 
         var result = await ExecuteContentQuery<TSchema>(builder,
             () => CacheHelper.GetCacheDependency($"{schemaName}|all"),
@@ -130,11 +131,11 @@ public sealed class ContentTypeRepository<TEntity>(
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentType<TEntity>(config => config
-                .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+                .WithLinkedItemsAndWebPageData(maxLinkedItems)
                 .Where(where =>
                     where.WhereEquals(nameof(IContentItemFieldsSource.SystemFields.ContentItemGUID), itemGuid))
                 .TopN(1))
-            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+            .WithLanguage(languageName);
 
         var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByIdAsync), itemGuid, maxLinkedItems);
@@ -150,11 +151,11 @@ public sealed class ContentTypeRepository<TEntity>(
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentType<TEntity>(config => config
-                .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+                .WithLinkedItemsAndWebPageData(maxLinkedItems)
                 .Where(where =>
                     where.WhereEquals(nameof(IContentItemFieldsSource.SystemFields.ContentItemID), id))
                 .TopN(1))
-            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+            .WithLanguage(languageName);
 
         var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByIdAsync), id, maxLinkedItems);
@@ -169,11 +170,11 @@ public sealed class ContentTypeRepository<TEntity>(
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentType<TEntity>(config => config
-                .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+                .WithLinkedItemsAndWebPageData(maxLinkedItems)
                 .Where(where => where
                     .WhereEquals(nameof(IContentQueryDataContainer.ContentItemGUID), id))
                 .TopN(1))
-            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+            .WithLanguage(languageName);
 
         var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByIdentifierAsync), id, maxLinkedItems);
@@ -189,11 +190,11 @@ public sealed class ContentTypeRepository<TEntity>(
 
         builder.ForContentType<TEntity>(query =>
                 query
-                    .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+                    .WithLinkedItemsAndWebPageData(maxLinkedItems)
                     .Where(where =>
                         where.WhereEquals(nameof(IContentItemFieldsSource.SystemFields.ContentItemName), name))
                     .TopN(1))
-            .When(!string.IsNullOrEmpty(languageName), lang => lang.InLanguage(languageName));
+            .WithLanguage(languageName);
 
         var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByNameAsync), name, maxLinkedItems);
@@ -210,7 +211,7 @@ public sealed class ContentTypeRepository<TEntity>(
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(config => config
-            .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+            .WithLinkedItemsAndWebPageData(maxLinkedItems)
             .OfContentType(contentType)
             .InSmartFolder(smartFolderId));
 
@@ -229,7 +230,7 @@ public sealed class ContentTypeRepository<TEntity>(
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(config => config
-            .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+            .WithLinkedItemsAndWebPageData(maxLinkedItems)
             .OfContentType(contentType)
             .InSmartFolder(smartFolderId));
 
@@ -255,7 +256,7 @@ public sealed class ContentTypeRepository<TEntity>(
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(config => config
-            .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+            .WithLinkedItemsAndWebPageData(maxLinkedItems)
             .OfContentType(contentTypes)
             .InSmartFolder(smartFolderId));
 
@@ -284,7 +285,7 @@ public sealed class ContentTypeRepository<TEntity>(
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(config => config
-            .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+            .WithLinkedItemsAndWebPageData(maxLinkedItems)
             .OfContentType(contentTypes)
             .InSmartFolder(smartFolderId));
 
@@ -314,7 +315,7 @@ public sealed class ContentTypeRepository<TEntity>(
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(config => config
-            .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+            .WithLinkedItemsAndWebPageData(maxLinkedItems)
             .OfContentType(contentTypes)
             .InSmartFolder(smartFolderId));
 
@@ -344,7 +345,7 @@ public sealed class ContentTypeRepository<TEntity>(
         var builder = new ContentItemQueryBuilder();
 
         builder.ForContentTypes(config => config
-            .When(maxLinkedItems > 0, linkOptions => linkOptions.WithLinkedItems(maxLinkedItems))
+            .WithLinkedItemsAndWebPageData(maxLinkedItems)
             .OfContentType(contentTypes)
             .InSmartFolder(smartFolderId));
 
@@ -374,8 +375,7 @@ public sealed class ContentTypeRepository<TEntity>(
 
         builder.ForContentType<TEntity>(config =>
             config
-                .When(maxLinkedItems > 0, options => options.WithLinkedItems(maxLinkedItems,
-                    linkOptions => linkOptions.IncludeWebPageData()))
+                .WithLinkedItemsAndWebPageData(maxLinkedItems)
                 .Where(where => where.WhereContainsTags(columnName, tagIdents)));
 
         var result = await ExecuteContentQuery<TEntity>(builder, dependencyFunc,
