@@ -44,4 +44,10 @@ public static class IWebPageFieldsSourceExtensions
     /// <returns>An enumerable containing the web page item IDs.</returns>
     public static IEnumerable<int> GetWebPageItemIds(this IEnumerable<IWebPageFieldsSource>? source) => source?.Select(x => x.SystemFields.WebPageItemID) ?? [];
 
+    /// <summary>
+    /// Gets the web page item GUIDs for the specified collection of <see cref="IWebPageFieldsSource"/>.
+    /// </summary>
+    /// <param name="source">The collection of sources to get the web page item GUIDs for.</param>
+    /// <returns>An enumerable containing the web page item GUIDs.</returns>
+    public static IEnumerable<Guid> GetWebPageItemGuids(this IEnumerable<IWebPageFieldsSource>? source) => source?.Select(x => x.SystemFields.WebPageItemGUID) ?? [];
 }

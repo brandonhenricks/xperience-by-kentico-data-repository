@@ -46,6 +46,13 @@ public static class IContentItemFieldsSourceExtensions
     public static IEnumerable<int> GetContentItemIds(this IEnumerable<IContentItemFieldsSource>? source) => source?.Select(x => x.SystemFields.ContentItemID) ?? [];
 
     /// <summary>
+    /// Gets the content item GUIDs from the specified collection of content item fields sources.
+    /// </summary>
+    /// <param name="source">The collection of content item fields sources.</param>
+    /// <returns>An enumerable containing the content item GUIDs.</returns>
+    public static IEnumerable<Guid> GetContentItemGUIDs(this IEnumerable<IContentItemFieldsSource>? source) => source?.Select(x => x.SystemFields.ContentItemGUID) ?? [];
+
+    /// <summary>
     /// Gets the content types from the specified collection of content item fields sources.
     /// </summary>
     /// <param name="source">The collection of content item fields sources.</param>
