@@ -188,7 +188,7 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions
             var result = source.GetRelatedWebPageGuids(x => x.RelatedItems);
 
             // Assert
-            Assert.That(result, Is.EquivalentTo(new[] { guid1, guid2 }));
+            Assert.That(result, Is.EquivalentTo([guid1, guid2]));
         }
 
         [Test]
@@ -302,7 +302,7 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions
 
         public class TestContentItemFieldsSource : IContentItemFieldsSource
         {
-            public static string CONTENT_TYPE_NAME = "TestContentItemFieldsSource";
+            public const string CONTENT_TYPE_NAME = "TestContentItemFieldsSource";
 
             public AssetRelatedItem RelatedAssetItem { get; set; } = new AssetRelatedItem();
 
@@ -314,7 +314,7 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions
 
         public class TestWebPageFieldsSource : IWebPageFieldsSource
         {
-            public static string CONTENT_TYPE_NAME = "TestWebPageFieldsSource";
+            public const string CONTENT_TYPE_NAME = "TestWebPageFieldsSource";
 
             public WebPageRelatedItem RelatedItem { get; set; } = new WebPageRelatedItem();
 
