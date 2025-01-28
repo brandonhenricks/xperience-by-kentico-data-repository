@@ -11,10 +11,11 @@
 - Prefer var over explicit types.
 - Employ dependency injection using the built-in DI container.
 - Handle exceptions gracefully and use `Microsoft.Extensions.Logging` for logging.
+- This is a Xperience By Kentico library, and as such should leverage built in api as much as possible.
 
 ## Testing Guidelnes
 
-- Use the AAA paattern (Arrange, Act, Assert)
+- Use the AAA pattern (Arrange, Act, Assert)
 - Avoid infrastructure dependencies.
 - Name tests clearly.
 - Write minimally passing tests.
@@ -23,7 +24,3 @@
 - Prefer helper methods for setup and teardown.
 - Avoid multiple acts in a single test.
 - Write unit tests using **NUnit** and aim for high code coverage.
-
-## Project-specific instructions
-
-- Utilize Xperience by Kentico API for database interactions if applicable.
