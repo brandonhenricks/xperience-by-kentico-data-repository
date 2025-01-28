@@ -1,4 +1,6 @@
-﻿using CMS.ContentEngine;
+﻿using System.Collections.ObjectModel;
+
+using CMS.ContentEngine;
 using CMS.Helpers;
 using CMS.Websites;
 using CMS.Websites.Routing;
@@ -9,10 +11,11 @@ using XperienceCommunity.DataRepository.Interfaces;
 using XperienceCommunity.DataRepository.Models;
 
 #pragma warning disable S1121
+
 namespace XperienceCommunity.DataRepository;
 
 public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IContentQueryExecutor executor,
-    IWebsiteChannelContext websiteChannelContext, RepositoryOptions options, ICacheDependencyBuilder cacheDependencyBuilder) : BaseRepository(cache, executor,
+    IWebsiteChannelContext websiteChannelContext, RepositoryOptions options, ICacheDependencyBuilder cacheDependencyBuilder, IWebPageUrlRetriever webPageUrlRetriever) : BaseRepository(cache, executor,
     websiteChannelContext, options, cacheDependencyBuilder), IPageRepository<TEntity>
     where TEntity : class, IWebPageFieldsSource
 {
@@ -37,6 +40,8 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
         var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetAllAsync), languageName ?? string.Empty, contentType, maxLinkedItems);
+
+        await UpdateWebPageUrls(webPageUrlRetriever, languageName, result, cancellationToken);
 
         return result;
     }
@@ -68,6 +73,8 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetAllAsync), guidList, languageName ?? string.Empty, contentType, maxLinkedItems);
 
+        await UpdateWebPageUrls(webPageUrlRetriever, languageName, result, cancellationToken);
+
         return result;
     }
 
@@ -96,6 +103,8 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
         var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetAllAsync), itemIdList, languageName ?? string.Empty, contentType, maxLinkedItems);
+
+        await UpdateWebPageUrls(webPageUrlRetriever, languageName, result, cancellationToken);
 
         return result;
     }
@@ -145,6 +154,8 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByGuidAsync), itemGuid, contentType, maxLinkedItems);
 
+        await UpdateWebPageUrls(webPageUrlRetriever, languageName, result, cancellationToken);
+
         return result.FirstOrDefault();
     }
 
@@ -169,6 +180,8 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByIdAsync), id, contentType, maxLinkedItems);
 
+        await UpdateWebPageUrls(webPageUrlRetriever, languageName, result, cancellationToken);
+
         return result.FirstOrDefault();
     }
 
@@ -189,6 +202,9 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
         var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc ?? (() => CacheDependencyHelper.CreateWebPageItemTypeCacheDependency([contentType], WebsiteChannelContext.WebsiteChannelName)),
             cancellationToken, CachePrefix, nameof(GetByPathAsync), path, contentType, maxLinkedItems);
+
+
+        await UpdateWebPageUrls(webPageUrlRetriever, languageName, result, cancellationToken);
 
         return result;
     }
@@ -219,6 +235,8 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         var result = await ExecutePageQuery<IWebPageFieldsSource>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByPathAsync), path, contentTypes, maxLinkedItems);
 
+        await UpdateWebPageUrls(webPageUrlRetriever, languageName, result, cancellationToken);
+
         return result;
     }
 
@@ -247,6 +265,8 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
         var result = await ExecutePageQuery<IWebPageFieldsSource>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByPathAsync), path, contentTypes, maxLinkedItems);
+
+        await UpdateWebPageUrls(webPageUrlRetriever, languageName, result, cancellationToken);
 
         return result;
     }
@@ -278,6 +298,8 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         var result = await ExecutePageQuery<IWebPageFieldsSource>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByPathAsync), path, contentTypes, maxLinkedItems);
 
+        await UpdateWebPageUrls(webPageUrlRetriever, languageName, result, cancellationToken);
+
         return result;
     }
 
@@ -307,6 +329,21 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
         var result = await ExecutePageQuery<TEntity>(builder, dependencyFunc,
             cancellationToken, CachePrefix, nameof(GetByTagsAsync), columnName, guidList, maxLinkedItems);
 
+        await UpdateWebPageUrls(webPageUrlRetriever, null, result, cancellationToken);
+
         return result;
+    }
+
+
+    private async Task UpdateWebPageUrls<T>(IWebPageUrlRetriever webPageUrlRetriever, string? languageName, IEnumerable<T> result, CancellationToken cancellationToken) where T : IWebPageFieldsSource
+    {
+        var webPageGuids = new ReadOnlyCollection<Guid>(result.Select(x => x.SystemFields.WebPageItemGUID).ToArray());
+
+        var webpageLinks = await webPageUrlRetriever.Retrieve(webPageGuids, WebsiteChannelContext.WebsiteChannelName, languageName, WebsiteChannelContext.IsPreview, cancellationToken);
+
+        foreach (var item in result)
+        {
+            item.SystemFields.WebPageUrlPath = webpageLinks.FirstOrDefault(x => x.Key == item.SystemFields.WebPageItemGUID).Value.RelativePath;
+        }
     }
 }
