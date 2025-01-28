@@ -104,7 +104,6 @@ public abstract class BaseRepository
                 return result;
             }
 
-
             if (dependencyFunc is not null)
             {
                 cs.CacheDependency = dependencyFunc.Invoke();

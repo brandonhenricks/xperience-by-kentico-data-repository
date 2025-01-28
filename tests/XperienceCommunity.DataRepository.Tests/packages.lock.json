@@ -4,9 +4,9 @@
     "net8.0": {
       "coverlet.collector": {
         "type": "Direct",
-        "requested": "[6.0.3, )",
-        "resolved": "6.0.3",
-        "contentHash": "SvLbRq7gjzE34BI90vP6ge812+PAjinNoKhdFZHwVEu/ozJgZY+0KyDh1K0teDeMeuzQJuF8OvleRBYXsZDz0A=="
+        "requested": "[6.0.4, )",
+        "resolved": "6.0.4",
+        "contentHash": "lkhqpF8Pu2Y7IiN7OntbsTtdbpR1syMsm2F3IgX6ootA4ffRqWL5jF7XipHuZQTdVuWG/gVAAcf8mjk8Tz0xPg=="
       },
       "Kentico.Xperience.Core": {
         "type": "Direct",
@@ -62,9 +62,9 @@
       },
       "NUnit.Analyzers": {
         "type": "Direct",
-        "requested": "[4.5.0, )",
-        "resolved": "4.5.0",
-        "contentHash": "GQysJCO0mi4bAW64DolpTcYLU3euxLiv7o3EYkp2RPGalUm4vgzX6ANiRAyIDWSSWmYUtFqBlmOUH6WkzxEADw=="
+        "requested": "[4.6.0, )",
+        "resolved": "4.6.0",
+        "contentHash": "uK1TEViVBugOO6uDou1amu7CoNhrd2sEUFr/iaEmVfoeY8qq/zzWCCUZi97aCCSZmjnHKCCWKh3RucU27qPlKg=="
       },
       "NUnit3TestAdapter": {
         "type": "Direct",
@@ -74,9 +74,9 @@
       },
       "SonarAnalyzer.CSharp": {
         "type": "Direct",
-        "requested": "[10.4.0.108396, )",
-        "resolved": "10.4.0.108396",
-        "contentHash": "xGcLZ+dvkVuBbd3sjPur9X+1owSL/iDoxVFJLhMx3/vq1fmoKM2fwvrZ8ReAas6l715GJ/dWU2ckwlrRVopmbg=="
+        "requested": "[10.5.0.109200, )",
+        "resolved": "10.5.0.109200",
+        "contentHash": "yS8uepqf+HwSEZtkJR7O4siqfyGKX4Lu7mIB6TTppy59czq7qkFjZ+fB7NTRZg8a/Pu7tvwVhpEMcxUTiQZmSw=="
       },
       "AngleSharp": {
         "type": "Transitive",
@@ -596,9 +596,9 @@
     "net9.0": {
       "coverlet.collector": {
         "type": "Direct",
-        "requested": "[6.0.3, )",
-        "resolved": "6.0.3",
-        "contentHash": "SvLbRq7gjzE34BI90vP6ge812+PAjinNoKhdFZHwVEu/ozJgZY+0KyDh1K0teDeMeuzQJuF8OvleRBYXsZDz0A=="
+        "requested": "[6.0.4, )",
+        "resolved": "6.0.4",
+        "contentHash": "lkhqpF8Pu2Y7IiN7OntbsTtdbpR1syMsm2F3IgX6ootA4ffRqWL5jF7XipHuZQTdVuWG/gVAAcf8mjk8Tz0xPg=="
       },
       "Kentico.Xperience.Core": {
         "type": "Direct",
@@ -654,9 +654,9 @@
       },
       "NUnit.Analyzers": {
         "type": "Direct",
-        "requested": "[4.5.0, )",
-        "resolved": "4.5.0",
-        "contentHash": "GQysJCO0mi4bAW64DolpTcYLU3euxLiv7o3EYkp2RPGalUm4vgzX6ANiRAyIDWSSWmYUtFqBlmOUH6WkzxEADw=="
+        "requested": "[4.6.0, )",
+        "resolved": "4.6.0",
+        "contentHash": "uK1TEViVBugOO6uDou1amu7CoNhrd2sEUFr/iaEmVfoeY8qq/zzWCCUZi97aCCSZmjnHKCCWKh3RucU27qPlKg=="
       },
       "NUnit3TestAdapter": {
         "type": "Direct",
@@ -666,9 +666,9 @@
       },
       "SonarAnalyzer.CSharp": {
         "type": "Direct",
-        "requested": "[10.4.0.108396, )",
-        "resolved": "10.4.0.108396",
-        "contentHash": "xGcLZ+dvkVuBbd3sjPur9X+1owSL/iDoxVFJLhMx3/vq1fmoKM2fwvrZ8ReAas6l715GJ/dWU2ckwlrRVopmbg=="
+        "requested": "[10.5.0.109200, )",
+        "resolved": "10.5.0.109200",
+        "contentHash": "yS8uepqf+HwSEZtkJR7O4siqfyGKX4Lu7mIB6TTppy59czq7qkFjZ+fB7NTRZg8a/Pu7tvwVhpEMcxUTiQZmSw=="
       },
       "AngleSharp": {
         "type": "Transitive",
