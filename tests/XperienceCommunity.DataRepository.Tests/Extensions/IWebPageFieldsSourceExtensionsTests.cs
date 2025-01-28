@@ -135,4 +135,61 @@ public class IWebPageFieldsSourceExtensionsTests
         Assert.That(result, Is.EqualTo(new[] { "TestWebPageFieldsSource", "TestWebPageFieldsSource" }));
         Assert.That(result, Is.EqualTo(new[] { "TestWebPageFieldsSource", "TestWebPageFieldsSource" }));
     }
+    [Test]
+    public void GetCacheDependencyKey_ShouldReturnEmptyArray_WhenSourceIsNull()
+    {
+        IWebPageFieldsSource? source = null;
+
+        string[] result = source.GetCacheDependencyKey();
+
+        Assert.That(result, Is.Empty);
+    }
+
+    [Test]
+    public void GetCacheDependencyKeys_ShouldReturnEmptyArray_WhenSourcesAreNull()
+    {
+        IEnumerable<IWebPageFieldsSource>? sources = null;
+
+        string[] result = sources.GetCacheDependencyKeys();
+
+        Assert.That(result, Is.Empty);
+    }
+
+    [Test]
+    public void GetWebPageItemIds_ShouldReturnEmptyArray_WhenSourcesAreNull()
+    {
+        IEnumerable<IWebPageFieldsSource>? sources = null;
+
+        var result = sources.GetWebPageItemIds();
+
+        Assert.That(result, Is.Empty);
+    }
+
+    [Test]
+    public void GetWebPageItemGuids_ShouldReturnCorrectGuids_WhenSourcesAreNotNull()
+    {
+        var sources = new List<IWebPageFieldsSource>
+        {
+            Substitute.For<IWebPageFieldsSource>(), Substitute.For<IWebPageFieldsSource>()
+        };
+
+        var systemFields1 = new WebPageFields() { WebPageItemGUID = Guid.NewGuid(), ContentItemIsSecured = false };
+        var systemFields2 = new WebPageFields() { WebPageItemGUID = Guid.NewGuid(), ContentItemIsSecured = false };
+
+        sources[0].SystemFields.Returns(systemFields1);
+        sources[1].SystemFields.Returns(systemFields2);
+
+        var result = sources.GetWebPageItemGuids();
+        Assert.That(result, Is.EqualTo(new[] { systemFields1.WebPageItemGUID, systemFields2.WebPageItemGUID }));
+    }
+
+    [Test]
+    public void GetWebPageItemGuids_ShouldReturnEmptyArray_WhenSourcesAreNull()
+    {
+        IEnumerable<IWebPageFieldsSource>? sources = null;
+
+        var result = sources.GetWebPageItemGuids();
+
+        Assert.That(result, Is.Empty);
+    }
 }

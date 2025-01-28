@@ -147,6 +147,25 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions
             Assert.That(result, Has.Count.EqualTo(2));
         }
 
+        [Test]
+        public void GetContentItemGUIDs_ReturnsCorrectGUIDs()
+        {
+            var source = new List<IContentItemFieldsSource>
+            {
+                Substitute.For<IContentItemFieldsSource>(), Substitute.For<IContentItemFieldsSource>()
+            };
+
+            var systemFields1 = new ContentItemFields { ContentItemGUID = Guid.NewGuid() };
+            var systemFields2 = new ContentItemFields { ContentItemGUID = Guid.NewGuid() };
+
+            source[0].SystemFields.Returns(systemFields1);
+            source[1].SystemFields.Returns(systemFields2);
+
+            var result = source.GetContentItemGUIDs();
+
+            Assert.That(result, Is.EqualTo(new[] { systemFields1.ContentItemGUID, systemFields2.ContentItemGUID }));
+        }
+
         public class TestContentItemFieldsSource : IContentItemFieldsSource
         {
             public static string CONTENT_TYPE_NAME = "TestContentItemFieldsSource";

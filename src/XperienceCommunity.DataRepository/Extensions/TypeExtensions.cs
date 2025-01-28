@@ -155,14 +155,17 @@ public static class TypeExtensions
             {
                 if (property.GetValue(source) is AssetRelatedItem item)
                 {
-                    guids.Add(item.Identifier);
+                    if (item.Identifier != Guid.Empty)
+                    {
+                        guids.Add(item.Identifier);
+                    }
                 }
             }
             else if (typeof(IEnumerable<AssetRelatedItem>).IsAssignableFrom(property.PropertyType))
             {
                 if (property.GetValue(source) is IEnumerable<AssetRelatedItem> items)
                 {
-                    guids.AddRange(items.Select(item => item.Identifier));
+                    guids.AddRange(items.Where(item => item.Identifier != Guid.Empty).Select(item => item.Identifier));
                 }
             }
         }
@@ -189,14 +192,17 @@ public static class TypeExtensions
             {
                 if (property.GetValue(source) is AssetRelatedItem item)
                 {
-                    guids.Add(item.Identifier);
+                    if (item.Identifier != Guid.Empty)
+                    {
+                        guids.Add(item.Identifier);
+                    }
                 }
             }
             else if (typeof(IEnumerable<AssetRelatedItem>).IsAssignableFrom(property.PropertyType))
             {
                 if (property.GetValue(source) is IEnumerable<AssetRelatedItem> items)
                 {
-                    guids.AddRange(items.Select(item => item.Identifier));
+                    guids.AddRange(items.Where(item => item.Identifier != Guid.Empty).Select(item => item.Identifier));
                 }
             }
         }
@@ -229,14 +235,17 @@ public static class TypeExtensions
             {
                 if (property.GetValue(source) is WebPageRelatedItem item)
                 {
-                    guids.Add(item.WebPageGuid);
+                    if (item.WebPageGuid != Guid.Empty)
+                    {
+                        guids.Add(item.WebPageGuid);
+                    }
                 }
             }
             else if (typeof(IEnumerable<WebPageRelatedItem>).IsAssignableFrom(property.PropertyType))
             {
                 if (property.GetValue(source) is IEnumerable<WebPageRelatedItem> items)
                 {
-                    guids.AddRange(items.Select(item => item.WebPageGuid));
+                    guids.AddRange(items.Where(item => item.WebPageGuid != Guid.Empty).Select(item => item.WebPageGuid));
                 }
             }
         }
@@ -253,14 +262,17 @@ public static class TypeExtensions
             {
                 if (property.GetValue(source) is WebPageRelatedItem item)
                 {
-                    guids.Add(item.WebPageGuid);
+                    if (item.WebPageGuid != Guid.Empty)
+                    {
+                        guids.Add(item.WebPageGuid);
+                    }
                 }
             }
             else if (typeof(IEnumerable<WebPageRelatedItem>).IsAssignableFrom(property.PropertyType))
             {
                 if (property.GetValue(source) is IEnumerable<WebPageRelatedItem> items)
                 {
-                    guids.AddRange(items.Select(item => item.WebPageGuid));
+                    guids.AddRange(items.Where(item => item.WebPageGuid != Guid.Empty).Select(item => item.WebPageGuid));
                 }
             }
         }
@@ -287,14 +299,17 @@ public static class TypeExtensions
             {
                 if (property.GetValue(source) is WebPageRelatedItem item)
                 {
-                    guids.Add(item.WebPageGuid);
+                    if (item.WebPageGuid != Guid.Empty)
+                    {
+                        guids.Add(item.WebPageGuid);
+                    }
                 }
             }
             else if (typeof(IEnumerable<WebPageRelatedItem>).IsAssignableFrom(property.PropertyType))
             {
                 if (property.GetValue(source) is IEnumerable<WebPageRelatedItem> items)
                 {
-                    guids.AddRange(items.Select(item => item.WebPageGuid));
+                    guids.AddRange(items.Where(item => item.WebPageGuid != Guid.Empty).Select(item => item.WebPageGuid));
                 }
             }
         }

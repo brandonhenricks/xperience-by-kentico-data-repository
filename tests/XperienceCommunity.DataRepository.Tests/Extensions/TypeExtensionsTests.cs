@@ -1,4 +1,5 @@
 using CMS.ContentEngine;
+using CMS.MediaLibrary;
 using CMS.Websites;
 
 using NSubstitute;
@@ -158,7 +159,7 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions
             var guid = Guid.NewGuid();
             var relatedItem = new WebPageRelatedItem { WebPageGuid = guid };
 
-            var source = new TestContentItemFieldsSource() { RelatedItem = relatedItem };
+            var source = new TestWebPageFieldsSource() { RelatedItem = relatedItem };
 
             // Act
             var result = source.GetRelatedWebPageGuids(x => x.RelatedItem);
@@ -191,6 +192,29 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions
         }
 
         [Test]
+        public void GetRelatedWebPageGuids_NoPropertySpecified_MultipleItems_ReturnsGuids()
+        {
+            // Arrange
+            var guid1 = Guid.NewGuid();
+            var guid2 = Guid.NewGuid();
+
+            var relatedItems = new List<WebPageRelatedItem>
+            {
+                new() { WebPageGuid = guid1 },
+                new() { WebPageGuid = guid2 }
+            };
+
+            var source = new TestWebPageFieldsSource() { RelatedItems = relatedItems };
+
+
+            // Act
+            var result = source.GetRelatedWebPageGuids();
+
+            // Assert
+            Assert.That(result, Is.EquivalentTo(new[] { guid1, guid2 }));
+        }
+
+        [Test]
         public void GetRelatedWebPageGuids_NoItems_ReturnsEmpty()
         {
             // Arrange
@@ -202,11 +226,88 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions
             // Assert
             Assert.That(result, Is.Empty);
         }
+
+        [Test]
+        public void GetRelatedAssetItemGuids_SingleItem_ReturnsGuid()
+        {
+            // Arrange
+            var guid = Guid.NewGuid();
+            var relatedItem = new AssetRelatedItem { Identifier = guid };
+
+            var source = new TestContentItemFieldsSource() { RelatedAssetItem = relatedItem };
+
+            // Act
+            var result = source.GetRelatedAssetItemGuids(x => x.RelatedAssetItem);
+
+            // Assert
+            Assert.That(result, Is.EquivalentTo(new[] { guid }));
+        }
+
+        [Test]
+        public void GetRelatedAssetItemGuids_MultipleItems_ReturnsGuids()
+        {
+            // Arrange
+            var guid1 = Guid.NewGuid();
+            var guid2 = Guid.NewGuid();
+
+            var relatedItems = new List<AssetRelatedItem>
+            {
+                new() { Identifier = guid1 },
+                new() { Identifier = guid2 }
+            };
+
+            var source = new TestContentItemFieldsSource() { RelatedAssetItems = relatedItems };
+
+            // Act
+            var result = source.GetRelatedAssetItemGuids(x => x.RelatedAssetItems);
+
+            // Assert
+            Assert.That(result, Is.EquivalentTo(new[] { guid1, guid2 }));
+        }
+
+        [Test]
+        public void GetRelatedAssetItemGuids_NoPropertyExpression_MultipleItems_ReturnsGuids()
+        {
+            // Arrange
+            var guid1 = Guid.NewGuid();
+            var guid2 = Guid.NewGuid();
+
+            var relatedItems = new List<AssetRelatedItem>
+            {
+                new() { Identifier = guid1 },
+                new() { Identifier = guid2 }
+            };
+
+            var source = new TestContentItemFieldsSource() { RelatedAssetItems = relatedItems };
+
+            // Act
+            var result = source.GetRelatedAssetItemGuids();
+
+            // Assert
+            Assert.That(result, Is.EquivalentTo(new[] { guid1, guid2 }));
+        }
+
+        [Test]
+        public void GetRelatedAssetItemGuids_NoItems_ReturnsEmpty()
+        {
+            // Arrange
+            var source = new TestContentItemFieldsSource();
+
+            // Act
+            var result = source.GetRelatedAssetItemGuids(x => x.RelatedAssetItems);
+
+            // Assert
+            Assert.That(result, Is.Empty);
+        }
+
         public class TestContentItemFieldsSource : IContentItemFieldsSource
         {
             public static string CONTENT_TYPE_NAME = "TestContentItemFieldsSource";
 
-            public WebPageRelatedItem RelatedItem { get; set; } = new WebPageRelatedItem();
+            public AssetRelatedItem RelatedAssetItem { get; set; } = new AssetRelatedItem();
+
+
+            public IEnumerable<AssetRelatedItem> RelatedAssetItems { get; set; } = [];
 
             public ContentItemFields SystemFields => throw new NotImplementedException();
         }
@@ -215,9 +316,13 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions
         {
             public static string CONTENT_TYPE_NAME = "TestWebPageFieldsSource";
 
+            public WebPageRelatedItem RelatedItem { get; set; } = new WebPageRelatedItem();
+
             public IEnumerable<WebPageRelatedItem> RelatedItems { get; set; } = [];
 
             public WebPageFields SystemFields => throw new NotImplementedException();
         }
+
+
     }
 }
