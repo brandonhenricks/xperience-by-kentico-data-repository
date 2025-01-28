@@ -168,7 +168,7 @@ namespace XperienceCommunity.DataRepository.Tests.Extensions
 
         public class TestContentItemFieldsSource : IContentItemFieldsSource
         {
-            public static string CONTENT_TYPE_NAME = "TestContentItemFieldsSource";
+            public const string CONTENT_TYPE_NAME = "TestContentItemFieldsSource";
             public ContentItemFields SystemFields => new ContentItemFields();
         }
     }

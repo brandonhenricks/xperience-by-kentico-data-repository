@@ -11,7 +11,7 @@ public class IWebPageFieldsSourceExtensionsTests
 {
     public class TestWebPageFieldsSource : IWebPageFieldsSource
     {
-        public static string CONTENT_TYPE_NAME = "TestWebPageFieldsSource";
+        public const string CONTENT_TYPE_NAME = "TestWebPageFieldsSource";
         public WebPageFields SystemFields => new();
     }
 
