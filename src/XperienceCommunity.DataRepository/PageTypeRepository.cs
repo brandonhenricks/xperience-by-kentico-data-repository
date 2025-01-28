@@ -343,7 +343,7 @@ public sealed class PageTypeRepository<TEntity>(IProgressiveCache cache, IConten
 
         foreach (var item in result)
         {
-            item.SystemFields.WebPageUrlPath = webpageLinks.FirstOrDefault(x => x.Key == item.SystemFields.WebPageItemGUID).Value.RelativePath;
+            item.SystemFields.WebPageUrlPath = webpageLinks.FirstOrDefault(x => x.Key == item.SystemFields.WebPageItemGUID).Value.AbsoluteUrl;
         }
     }
 }
